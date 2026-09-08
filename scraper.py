@@ -7,9 +7,9 @@ import urllib.parse
 from bs4 import BeautifulSoup
 import requests
 
-base = 'https://www.salonapprentice.com/free-salon-services/SalonApprentice_list.php?q=(city~equals~'
+BASE = 'https://www.salonapprentice.com/free-salon-services/SalonApprentice_list.php?q=(city~equals~'
 
-cities = [
+CITIES = [
     "Atlanta",
     "Austin",
     "Boston",
@@ -87,9 +87,9 @@ def get_ads(url):
 def loop_cities():
     all_ads = []
 
-    for city in cities:
+    for city in CITIES:
         city = urllib.parse.quote(city)
-        url = base + city + ')'
+        url = BASE + city + ')'
         all_ads.extend(get_ads(url))
 
     return all_ads
