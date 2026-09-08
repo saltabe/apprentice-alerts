@@ -61,7 +61,7 @@ def get_ads(url):
 
     for row in rows:
         link = row.find("a", href=re.compile(r"editid1=\d+"))
-        source_id = re.search(r"editid1=(\d+)", link["href"]).group(1)
+        edit_id = re.search(r"editid1=(\d+)", link["href"]).group(1)
         title = row.find(attrs={"data-field": "ad_title"}).get_text(strip=True)
         service_type = row.find(attrs={"data-field": "service_type"}).get_text(strip=True)
         fee = row.find(attrs={"data-field": "fee"}).get_text(strip=True)
@@ -70,7 +70,7 @@ def get_ads(url):
         next_service_date = row.find(attrs={"data-field": "service_date"}).get_text(strip=True)
 
         ad = {
-            "source_id": source_id,
+            "edit_id": edit_id,
             "title": title,
             "service_type": service_type,
             "fee": fee,

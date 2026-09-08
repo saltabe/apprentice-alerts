@@ -63,7 +63,7 @@ def delete_user(conn, email):
 def create_ads_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ads (
-            id INTEGER PRIMARY KEY
+            edit_id INTEGER PRIMARY KEY
             , title TEXT
             , service_type TEXT
             , fee TEXT
@@ -76,25 +76,26 @@ def create_ads_table(conn):
     """)
 
 
-def insert_ad(conn, title, service_type, fee, salon, neighborhood, next_service_date):
+def insert_ad(conn, edit_id, title, service_type, fee, salon, neighborhood, next_service_date):
     conn.execute("""
         INSERT INTO ads (
-            title
+            edit_id
+            , title
             , service_type
             , fee
             , salon
             , neighborhood
             , next_service_date
             )
-        VALUES (?, ?, ?, ?, ?, ?)
-    """, (title, service_type, fee, salon, neighborhood, next_service_date)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (edit_id, title, service_type, fee, salon, neighborhood, next_service_date)
     # sent is left null to indicate no
     )
 
 
-def select_ad(conn, title):
-    return conn.execute("SELECT * FROM ads WHERE title = ?", (title,)).fetchone()
+def select_ad(conn, edit_id):
+    return conn.execute("SELECT * FROM ads WHERE edit_id = ?", (edit_id,)).fetchone()
 
 
-def update_ad(conn, ad_id):
-    conn.execute("UPDATE ads SET sent = 1 WHERE id = ?", (ad_id,))
+def update_ad(conn, edit_id):
+    conn.execute("UPDATE ads SET sent = 1 WHERE edit_id = ?", (edit_id,))
