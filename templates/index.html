@@ -1,0 +1,122 @@
+{% extends "layout.html" %}
+
+{%block main%}
+
+<div class=""container">
+    <div class=""section">
+        <h2>Sign up for custom email alerts</h2>
+        <form action="/" method="post">
+            <select name="city" id="city">
+                <option value="Atlanta">Atlanta, Georgia</option>
+                <option value="Austin">Austin, Texas</option>
+                <option value="Boston">Boston, Massachusetts</option>
+                <option value="Charlotte, NC">Charlotte, North Carolina</option>
+                <option value="Chicago">Chicago, Illinois</option>
+                <option value="Columbus, OH">Columbus, Ohio</option>
+                <option value="Dallas">Dallas, Texas</option>
+                <option value="Denver">Denver, Colorado</option>
+                <option value="Houston, TX">Houston, Texas</option>
+                <option value="Jersey City, NJ">Jersey City, New Jersey</option>
+                <option value="las Vegas">Las Vegas, Nevada</option>
+                <option value="London (England)">London, England</option>
+                <option value="Los Angeles">Los Angeles, California</option>
+                <option value="Miami">Miami, Florida</option>
+                <option value="Minneapolis / St Paul">Minneapolis / St. Paul, Minnesota</option>
+                <option value="Montréal (Québec, Canada)">Montréal, Canada</option>
+                <option value="Nashville, TN">Nashville, Tennessee</option>
+                <option value="New York">New York, New York</option>
+                <option value="Philadelphia">Philadelphia, Pennsylvania</option>
+                <option value="San Diego, CA">San Diego, California</option>
+                <option value="San Francisco">San Francisco, California</option>
+                <option value="San Jose, CA">San Jose, California</option>
+                <option value="Scottsdale, AZ">Scottsdale, Arizona</option>
+                <option value="Seattle">Seattle, Washington</option>
+                <option value="St. Louis">St. Louis, Missouri</option>
+                <option value="Sydney (Australia)">Sydney, Australia</option>
+                <option value="Toronto (Ontario, Canada)">Toronto, Canada</option>
+                <option value="Vancouver (British Columbia, Canada)">Vancouver, Canada</option>
+                <option value="Washington DC">Washington DC, United States of America</option>
+            </select>
+
+            <input name="keyword" type="text">
+
+            <input name="email" type="text">
+
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+https://medium.com/@dimterion/multi-step-form-with-html-css-javascript-a712dc827cb6
+
+<div class="tag-container">
+  <div id="tag-list"></div>
+  <input type="text" id="tag-input" placeholder="Type answer and press Enter...">
+  <!-- Hidden input that holds the actual combined string for form submission -->
+  <input type="hidden" name="all_answers" id="hidden-answers">
+</div>
+
+<style>
+  .tag-container {
+    border: 1px solid #ccc;
+    padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    background: #fff;
+  }
+  #tag-input {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+  }
+  .tag {
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tag .remove {
+    cursor: pointer;
+    color: red;
+  }
+</style>
+
+<script>
+  const tagInput = document.getElementById('tag-input');
+  const tagList = document.getElementById('tag-list');
+  const hiddenAnswers = document.getElementById('hidden-answers');
+  let answersArray = [];
+
+  tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const value = tagInput.value.trim();
+      if (value && !answersArray.includes(value)) {
+        answersArray.push(value);
+        renderTags();
+        tagInput.value = '';
+      }
+    }
+  });
+
+  function renderTags() {
+    tagList.innerHTML = '';
+    answersArray.forEach((tag, index) => {
+      const tagEl = document.createElement('span');
+      tagEl.classList.add('tag');
+      tagEl.innerHTML = `${tag} <span class="remove" onclick="removeTag(${index})">&times;</span>`;
+      tagList.appendChild(tagEl);
+    });
+    hiddenAnswers.value = answersArray.join(','); // Submits as "ans1,ans2,ans3"
+  }
+
+  function removeTag(index) {
+    answersArray.splice(index, 1);
+    renderTags();
+  }
+</script>
