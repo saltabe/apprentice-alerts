@@ -39,6 +39,10 @@ def select_user(conn, email):
     return conn.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchall()
 
 
+def select_all_users(conn):
+    return conn.execute("SELECT * FROM users").fetchall()
+
+
 def select_emails(conn, keyword):
     rows = conn.execute("SELECT email FROM users WHERE keyword = ?", (keyword,)).fetchall()
 

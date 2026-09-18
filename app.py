@@ -121,4 +121,6 @@ def update():
         city = rows[0]["city"]
         keywords = [row["keyword"] for row in rows]
 
-        return render_template("change.html", email=email, city=city, keywords=keywords)
+        return render_template(
+            "change.html", email=email, city=city, keywords=keywords, token=token
+        )

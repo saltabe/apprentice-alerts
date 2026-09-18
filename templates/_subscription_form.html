@@ -1,0 +1,105 @@
+<select name="city" id="city">
+    <option value="Atlanta"{% if city == "Atlanta" %} selected{% endif %}>Atlanta, Georgia</option>
+    <option value="Austin"{% if city == "Austin" %} selected{% endif %}>Austin, Texas</option>
+    <option value="Boston"{% if city == "Boston" %} selected{% endif %}>Boston, Massachusetts</option>
+    <option value="Charlotte, NC"{% if city == "Charlotte, NC" %} selected{% endif %}>Charlotte, North Carolina</option>
+    <option value="Chicago"{% if city == "Chicago" %} selected{% endif %}>Chicago, Illinois</option>
+    <option value="Columbus, OH"{% if city == "Columbus, OH" %} selected{% endif %}>Columbus, Ohio</option>
+    <option value="Dallas"{% if city == "Dallas" %} selected{% endif %}>Dallas, Texas</option>
+    <option value="Denver"{% if city == "Denver" %} selected{% endif %}>Denver, Colorado</option>
+    <option value="Houston, TX"{% if city == "Houston, TX" %} selected{% endif %}>Houston, Texas</option>
+    <option value="Jersey City, NJ"{% if city == "Jersey City, NJ" %} selected{% endif %}>Jersey City, New Jersey</option>
+    <option value="las Vegas"{% if city == "las Vegas" %} selected{% endif %}>Las Vegas, Nevada</option>
+    <option value="London (England)"{% if city == "London (England)" %} selected{% endif %}>London, England</option>
+    <option value="Los Angeles"{% if city == "Los Angeles" %} selected{% endif %}>Los Angeles, California</option>
+    <option value="Miami"{% if city == "Miami" %} selected{% endif %}>Miami, Florida</option>
+    <option value="Minneapolis / St Paul"{% if city == "Minneapolis / St Paul" %} selected{% endif %}>Minneapolis / St. Paul, Minnesota</option>
+    <option value="Montréal (Québec, Canada)"{% if city == "Montréal (Québec, Canada)" %} selected{% endif %}>Montréal, Canada</option>
+    <option value="Nashville, TN"{% if city == "Nashville, TN" %} selected{% endif %}>Nashville, Tennessee</option>
+    <option value="New York"{% if city == "New York" %} selected{% endif %}>New York, New York</option>
+    <option value="Philadelphia"{% if city == "Philadelphia" %} selected{% endif %}>Philadelphia, Pennsylvania</option>
+    <option value="San Diego, CA"{% if city == "San Diego, CA" %} selected{% endif %}>San Diego, California</option>
+    <option value="San Francisco"{% if city == "San Francisco" %} selected{% endif %}>San Francisco, California</option>
+    <option value="San Jose, CA"{% if city == "San Jose, CA" %} selected{% endif %}>San Jose, California</option>
+    <option value="Scottsdale, AZ"{% if city == "Scottsdale, AZ" %} selected{% endif %}>Scottsdale, Arizona</option>
+    <option value="Seattle"{% if city == "Seattle" %} selected{% endif %}>Seattle, Washington</option>
+    <option value="St. Louis"{% if city == "St. Louis" %} selected{% endif %}>St. Louis, Missouri</option>
+    <option value="Sydney (Australia)"{% if city == "Sydney (Australia)" %} selected{% endif %}>Sydney, Australia</option>
+    <option value="Toronto (Ontario, Canada)"{% if city == "Toronto (Ontario, Canada)" %} selected{% endif %}>Toronto, Canada</option>
+    <option value="Vancouver (British Columbia, Canada)"{% if city == "Vancouver (British Columbia, Canada)" %} selected{% endif %}>Vancouver, Canada</option>
+    <option value="Washington DC"{% if city == "Washington DC" %} selected{% endif %}>Washington DC, United States of America</option>
+</select>
+
+<input name="email" type="text" placeholder="Email address" value="{{ email|default('') }}">
+
+<div class="tag-container">
+    <div id="tag-list"></div>
+    <input type="text" id="tag-input" placeholder="Keyword...">
+    <!-- Hidden input that holds the comma-joined keyword list for form submission -->
+    <input type="hidden" name="keywords" id="hidden-keywords">
+</div>
+
+<style>
+  .tag-container {
+    border: 1px solid #ccc;
+    padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    background: #fff;
+  }
+  #tag-input {
+    border: none;
+    outline: none;
+    flex-grow: 1;
+  }
+  .tag {
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .tag .remove {
+    cursor: pointer;
+    color: red;
+  }
+</style>
+
+<script>
+  const tagInput = document.getElementById('tag-input');
+  const tagList = document.getElementById('tag-list');
+  const hiddenKeywords = document.getElementById('hidden-keywords');
+  let keywordsArray = {{ keywords|default([])|tojson }};
+
+  function renderTags() {
+    tagList.innerHTML = '';
+    keywordsArray.forEach((tag, index) => {
+      const tagEl = document.createElement('span');
+      tagEl.classList.add('tag');
+      tagEl.innerHTML = `${tag} <span class="remove" onclick="removeTag(${index})">&times;</span>`;
+      tagList.appendChild(tagEl);
+    });
+    hiddenKeywords.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
+  }
+
+  function removeTag(index) {
+    keywordsArray.splice(index, 1);
+    renderTags();
+  }
+
+  tagInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const value = tagInput.value.trim();
+      if (value && !keywordsArray.includes(value)) {
+        keywordsArray.push(value);
+        renderTags();
+        tagInput.value = '';
+      }
+    }
+  });
+
+  renderTags();
+</script>
