@@ -111,7 +111,7 @@ def _build_ad_card(ad):
 
 
 def _build_html_body(email, ads):
-    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">{escape(_intro_text(ads))}</p>'
+    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; text-align: center; {_FONT}">{escape(_intro_text(ads))}</p>'
 
     cards = "".join(_build_ad_card(ad) for ad in ads)
 
@@ -119,7 +119,7 @@ def _build_html_body(email, ads):
     footer = f"""
     <tr>
       <td style="padding: 16px 0 0; border-top: 1px solid {_BORDER};">
-        <p style="margin: 16px 0 0; font-size: 12px; color: {_MUTED}; {_FONT}">
+        <p style="margin: 16px 0 0; font-size: 11px; color: {_MUTED}; text-align: center; {_FONT}">
           <a href="{manage_url}" style="color: {_MUTED};">Update your subscription or unsubscribe</a> from our emails.
         </p>
       </td>
