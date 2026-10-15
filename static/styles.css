@@ -101,6 +101,11 @@ h1 {
   font-size: 0.95rem;
 }
 
+/* pages without a subtitle still need breathing room below the h1 */
+h1 + form {
+  margin-top: var(--space-3);
+}
+
 .field {
   position: relative;
   margin-bottom: var(--space-2);
