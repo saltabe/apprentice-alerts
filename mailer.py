@@ -33,7 +33,7 @@ def get_listing_url(ad):
     )
 
 
-def build_plain_body(ads):
+def build_plain_body(email, ads):
     lines = ["New listings that match your specifications", ""]
 
     for ad in ads:
@@ -49,10 +49,12 @@ def build_plain_body(ads):
         lines.append(url)
         lines.append("")
 
+    lines.append(f"Manage your alerts or unsubscribe: {get_user_url(email)}")
+
     return "\n".join(lines)
 
 
-def build_html_body(ads):
+def build_html_body(email, ads):
     intro = "<p>New listings that match your specifications</p>"
 
     header = (
@@ -76,7 +78,10 @@ def build_html_body(ads):
 
         rows.append("<tr>" + cells + "</tr>")
 
-    return intro + "<table>" + "".join(rows) + "</table>"
+    manage_url = escape(get_user_url(email))
+    footer = f'<p><a href="{manage_url}">Manage your alerts or unsubscribe</a></p>'
+
+    return intro + "<table>" + "".join(rows) + "</table>" + footer
 
 
 def send_email(email, subject, plain_body, html_body):
@@ -95,7 +100,7 @@ def send_email(email, subject, plain_body, html_body):
 
 def write_email(email, ads):
     subject = "New listings from Apprentice Alerts"
-    plain_body = build_plain_body(ads)
-    html_body = build_html_body(ads)
+    plain_body = build_plain_body(email, ads)
+    html_body = build_html_body(email, ads)
 
     send_email(email, subject, plain_body, html_body)
