@@ -7,7 +7,7 @@ import urllib.parse
 from bs4 import BeautifulSoup
 import requests
 
-_BASE = 'https://www.salonapprentice.com/free-salon-services/SalonApprentice_list.php?q=(city~equals~'
+_BASE = "https://www.salonapprentice.com/free-salon-services/SalonApprentice_list.php?q=(city~equals~"
 
 CITIES = [
     "Atlanta",
@@ -77,12 +77,12 @@ CITY_LABELS = {
 }
 
 
-def _get_soup(url, header_info=''):
-    headers = {'user-agent' : header_info}
+def _get_soup(url, header_info=""):
+    headers = {"user-agent": header_info}
     req = requests.get(url, headers=headers)
 
     src = req.text
-    soup = BeautifulSoup(src, 'html.parser')
+    soup = BeautifulSoup(src, "html.parser")
 
     return soup
 
@@ -129,7 +129,7 @@ def loop_cities():
 
     for city in CITIES:
         city = urllib.parse.quote(city)
-        url = _BASE + city + ')'
+        url = _BASE + city + ")"
         all_ads.extend(_get_ads(url))
 
     return all_ads

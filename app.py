@@ -1,3 +1,7 @@
+# Flask web app: signup form, and the token-based manage/unsubscribe page.
+# daily_alert.py (the actual scrape-and-email job) runs inside this same
+# process, triggered by the /run-daily-alert route.
+
 import os
 
 import requests
@@ -12,13 +16,12 @@ from scraper import CITIES, CITY_LABELS
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY")
-serializer = URLSafeSerializer(app.secret_key)
+_serializer = URLSafeSerializer(app.secret_key)
 
-conn = models.get_connection()
-models.init_db(conn)
+models.init_db(models.get_connection())
 
 
-def get_forms():
+def _get_forms():
     email = request.form.get("email")
     city = request.form.get("city")
     keywords_str = request.form.get("keywords")
@@ -26,15 +29,30 @@ def get_forms():
     return email, city, keywords_str
 
 
-def format_keywords(keywords_str):
+def _format_keywords(keywords_str):
     return [item.strip() for item in keywords_str.split(',')]
 
 
-def decode_token(token):
+def _decode_token(token):
     try:
-        return serializer.loads(token)
+        return _serializer.loads(token)
     except BadSignature:
         return None
+
+
+def _signup_form_valid(email, city, keywords_str):
+    return bool(email) and city in CITIES and bool(keywords_str)
+
+
+def _render_manage_page(email, city, keywords, token):
+    return render_template(
+        "change.html",
+        email=email,
+        city=city,
+        keywords=keywords,
+        token=token,
+        city_labels=CITY_LABELS,
+    )
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -42,18 +60,12 @@ def index():
     if request.method == "POST":
         conn = models.get_connection()
 
-        email, city, keywords_str = get_forms()
+        email, city, keywords_str = _get_forms()
 
-        if not email:
+        if not _signup_form_valid(email, city, keywords_str):
             return redirect("/")
 
-        if not city or city not in CITIES:
-            return redirect("/")
-
-        if not keywords_str:
-            return redirect("/")
-
-        keywords = format_keywords(keywords_str)
+        keywords = _format_keywords(keywords_str)
 
         for keyword in keywords:
             models.insert_user(conn, email, city, keyword)
@@ -74,7 +86,7 @@ def update():
         conn = models.get_connection()
 
         token = request.args.get("token")
-        old_email = decode_token(token)
+        old_email = _decode_token(token)
 
         if not old_email:
             return redirect("/")
@@ -89,22 +101,16 @@ def update():
 
         # below code is for if user modifies subscription
 
-        email, city, keywords_str = get_forms()
+        email, city, keywords_str = _get_forms()
 
-        if not email:
-            return redirect("/")
-
-        if not city or city not in CITIES:
-            return redirect("/")
-
-        if not keywords_str:
+        if not _signup_form_valid(email, city, keywords_str):
             return redirect("/")
 
         # delete all existing entries for user
         # to keep it simple
         models.delete_user(conn, old_email)
 
-        keywords = format_keywords(keywords_str)
+        keywords = _format_keywords(keywords_str)
 
         for keyword in keywords:
             models.insert_user(conn, email, city, keyword)
@@ -113,20 +119,13 @@ def update():
 
         flash("Your subscription has been updated.")
 
-        return render_template(
-            "change.html",
-            email=email,
-            city=city,
-            keywords=keywords,
-            token=token,
-            city_labels=CITY_LABELS,
-        )
+        return _render_manage_page(email, city, keywords, token)
 
     else:
         conn = models.get_connection()
 
         token = request.args.get("token")
-        old_email = decode_token(token)
+        old_email = _decode_token(token)
 
         if not old_email:
             return redirect("/")
@@ -136,14 +135,7 @@ def update():
         city = rows[0]["city"]
         keywords = [row["keyword"] for row in rows]
 
-        return render_template(
-            "change.html",
-            email=email,
-            city=city,
-            keywords=keywords,
-            token=token,
-            city_labels=CITY_LABELS,
-        )
+        return _render_manage_page(email, city, keywords, token)
 
 
 @app.route("/run-daily-alert", methods=["POST"])

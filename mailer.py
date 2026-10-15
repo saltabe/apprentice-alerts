@@ -125,17 +125,23 @@ def _build_html_body(email, ads):
     """
 
     return f"""
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: {_BG}; padding: 32px 16px;">
-      <tr>
-        <td align="center">
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
-            <tr><td style="padding: 0 0 4px;">{intro}</td></tr>
-            {cards}
-            {footer}
-          </table>
-        </td>
-      </tr>
-    </table>
+    <!doctype html>
+    <html>
+      <head><meta charset="utf-8"></head>
+      <body style="margin: 0; padding: 0; background: {_BG};">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: {_BG};">
+          <tr>
+            <td align="center" style="padding: 32px 16px;">
+              <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
+                <tr><td style="padding: 0 0 4px;">{intro}</td></tr>
+                {cards}
+                {footer}
+              </table>
+            </td>
+          </tr>
+        </table>
+      </body>
+    </html>
     """
 
 

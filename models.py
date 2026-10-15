@@ -44,19 +44,6 @@ def select_all_users(conn):
     return conn.execute("SELECT * FROM users").fetchall()
 
 
-def select_emails(conn, keyword):
-    rows = conn.execute("SELECT email FROM users WHERE keyword = ?", (keyword,)).fetchall()
-
-    return [row["email"] for row in rows]
-
-
-def update_user(conn, new_email, new_city, new_keyword, email, keyword):
-    conn.execute(
-        "UPDATE users SET email = ?, city = ?, keyword = ? WHERE email = ? AND keyword = ?",
-        (new_email, new_city, new_keyword, email, keyword)
-    )
-
-
 def delete_user(conn, email):
     conn.execute("DELETE FROM users WHERE email = ?", (email,))
 
