@@ -3,7 +3,6 @@
 {% block main %}
 
 <h1>Manage your subscription</h1>
-<p class="subtitle">Update your city or keywords, or unsubscribe entirely.</p>
 
 <form action="/update?token={{ token }}" method="post">
     {% include "_subscription_form.html" %}
