@@ -36,11 +36,8 @@ def get_listing_url(ad):
 def _format_fee(fee):
     if fee == "No":
         return "Free"
-
-    if fee == "Yes":
+    else:
         return "Discounted"
-
-    return fee
 
 
 def _ad_details(ad):
