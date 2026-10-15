@@ -34,7 +34,7 @@ def get_listing_url(ad):
 
 
 def build_plain_body(email, ads):
-    lines = ["New listings that match your preferences", ""]
+    lines = ["New listings that match your preferences:", ""]
 
     for ad in ads:
         url = get_listing_url(ad)
@@ -92,7 +92,7 @@ def _build_ad_card(ad):
 
 
 def build_html_body(email, ads):
-    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">New listings that match your preferences</p>'
+    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">New listings that match your preferences:</p>'
 
     cards = "".join(_build_ad_card(ad) for ad in ads)
 
