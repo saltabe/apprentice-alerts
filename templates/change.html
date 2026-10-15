@@ -6,9 +6,9 @@
 <p class="confirmation">{{ message }}</p>
 {% endfor %}
 
+{% if not unsubscribed %}
 <h1>Manage your subscription</h1>
 
-{% if not unsubscribed %}
 <form action="/update?token={{ token }}" method="post">
     {% include "_subscription_form.html" %}
 
