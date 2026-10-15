@@ -15,6 +15,17 @@ serializer = URLSafeSerializer(secret_key)
 
 URL = "https://apprentice.saltable.fyi"
 
+_NUMBER_WORDS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
+
+# email clients mostly ignore <style> blocks and external CSS, so every
+# rule below has to be inline; these mirror static/styles.css's palette
+_FONT = "font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;"
+_TEXT = "#2b2b2b"
+_MUTED = "#6b6b6b"
+_BORDER = "#e5e2de"
+_BG = "#faf9f7"
+_CARD_BG = "#ffffff"
+
 
 def encode_token(email):
     return serializer.dumps(email)
@@ -47,9 +58,6 @@ def _ad_details(ad):
     return [value for value in values if value]
 
 
-_NUMBER_WORDS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
-
-
 def _intro_text(ads):
     count = len(ads)
     word = _NUMBER_WORDS.get(count, str(count))
@@ -76,16 +84,6 @@ def build_plain_body(email, ads):
     lines.append(f"Update your subscription or unsubscribe from our emails: {get_user_url(email)}")
 
     return "\n".join(lines)
-
-
-# email clients mostly ignore <style> blocks and external CSS, so every
-# rule here has to be inline; these mirror static/styles.css's palette
-_FONT = "font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;"
-_TEXT = "#2b2b2b"
-_MUTED = "#6b6b6b"
-_BORDER = "#e5e2de"
-_BG = "#faf9f7"
-_CARD_BG = "#ffffff"
 
 
 def _build_ad_card(ad):
