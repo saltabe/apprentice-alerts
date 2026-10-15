@@ -1,9 +1,11 @@
 import os
 
+import requests
 from dotenv import load_dotenv
 from flask import Flask, flash, redirect, render_template, request
 from itsdangerous import BadSignature, URLSafeSerializer
 
+import daily_alert
 import models
 from scraper import CITIES, CITY_LABELS
 
@@ -132,3 +134,25 @@ def update():
             token=token,
             city_labels=CITY_LABELS,
         )
+
+
+@app.route("/run-daily-alert", methods=["POST"])
+def run_daily_alert():
+    secret = request.headers.get("X-Cron-Secret")
+
+    if not secret or secret != os.environ.get("CRON_SECRET"):
+        return "forbidden", 403
+
+    healthcheck_url = os.environ.get("HEALTHCHECK_URL")
+
+    try:
+        daily_alert.main()
+    except Exception:
+        if healthcheck_url:
+            requests.get(healthcheck_url + "/fail", timeout=10)
+        raise
+
+    if healthcheck_url:
+        requests.get(healthcheck_url, timeout=10)
+
+    return "ok", 200
