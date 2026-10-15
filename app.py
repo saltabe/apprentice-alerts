@@ -85,7 +85,7 @@ def update():
             models.delete_user(conn, old_email)
             conn.commit()
             flash("You've been unsubscribed.")
-            return redirect("/")
+            return render_template("change.html", unsubscribed=True)
 
         # below code is for if user modifies subscription
 
@@ -113,7 +113,14 @@ def update():
 
         flash("Your subscription has been updated.")
 
-        return redirect("/")
+        return render_template(
+            "change.html",
+            email=email,
+            city=city,
+            keywords=keywords,
+            token=token,
+            city_labels=CITY_LABELS,
+        )
 
     else:
         conn = models.get_connection()
