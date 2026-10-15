@@ -2,7 +2,7 @@
 # Called by daily_alert.py.
 
 from email.message import EmailMessage
-from html import escape
+from html import escape, unescape
 import os
 import smtplib
 
@@ -55,7 +55,9 @@ def _ad_details(ad):
     # blank fields (e.g. no salon listed) are dropped rather than shown as empty
     values = [ad["service_type"], _format_fee(ad["fee"]), ad["salon"], ad["neighborhood"], ad["next_service_date"]]
 
-    return [value for value in values if value]
+    # some listings have HTML entities typed literally into their text
+    # (e.g. a pasted-in emoji that got double-encoded) - decode those back
+    return [unescape(value) for value in values if value]
 
 
 def _intro_text(ads):
@@ -72,7 +74,7 @@ def _build_plain_body(email, ads):
     for ad in ads:
         url = _get_listing_url(ad)
 
-        lines.append(ad["title"])
+        lines.append(unescape(ad["title"]))
 
         for detail in _ad_details(ad):
             lines.append(f"- {detail}")
@@ -88,7 +90,7 @@ def _build_plain_body(email, ads):
 
 def _build_ad_card(ad):
     url = escape(_get_listing_url(ad))
-    title = escape(ad["title"])
+    title = escape(unescape(ad["title"]))
     details = " &middot; ".join(escape(value) for value in _ad_details(ad))
 
     return f"""
