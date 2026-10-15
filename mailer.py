@@ -47,8 +47,19 @@ def _ad_details(ad):
     return [value for value in values if value]
 
 
+_NUMBER_WORDS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
+
+
+def _intro_text(ads):
+    count = len(ads)
+    word = _NUMBER_WORDS.get(count, str(count))
+    noun = "listing" if count == 1 else "listings"
+
+    return f"{word} new {noun} matching your preferences:"
+
+
 def build_plain_body(email, ads):
-    lines = ["New listings that match your preferences:", ""]
+    lines = [_intro_text(ads), ""]
 
     for ad in ads:
         url = get_listing_url(ad)
@@ -100,7 +111,7 @@ def _build_ad_card(ad):
 
 
 def build_html_body(email, ads):
-    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">New listings that match your preferences:</p>'
+    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">{escape(_intro_text(ads))}</p>'
 
     cards = "".join(_build_ad_card(ad) for ad in ads)
 
@@ -135,6 +146,7 @@ def send_email(email, subject, plain_body, html_body):
     msg["Subject"] = subject
     msg["From"] = os.environ.get("ALERTS_FROM_EMAIL")
     msg["To"] = email
+    msg["List-Unsubscribe"] = f"<{get_user_url(email)}>"
     msg.set_content(plain_body)
     msg.add_alternative(html_body, subtype="html")
 
