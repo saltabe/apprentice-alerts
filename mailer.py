@@ -49,7 +49,7 @@ def build_plain_body(email, ads):
         lines.append(url)
         lines.append("")
 
-    lines.append(f"Manage your alerts or unsubscribe: {get_user_url(email)}")
+    lines.append(f"Manage your alerts or unsubscribe here: {get_user_url(email)}")
 
     return "\n".join(lines)
 
@@ -79,7 +79,7 @@ def build_html_body(email, ads):
         rows.append("<tr>" + cells + "</tr>")
 
     manage_url = escape(get_user_url(email))
-    footer = f'<p><a href="{manage_url}">Manage your alerts or unsubscribe</a></p>'
+    footer = f'<p>Manage your alerts or unsubscribe <a href="{manage_url}">here</a></p>'
 
     return intro + "<table>" + "".join(rows) + "</table>" + footer
 
