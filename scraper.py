@@ -96,6 +96,11 @@ def get_ads(url):
 
     for row in rows:
         link = row.find("a", href=re.compile(r"editid1=\d+"))
+
+        if link is None:
+            # the header row carries the same r-gridrow class as real listings
+            continue
+
         edit_id = re.search(r"editid1=(\d+)", link["href"]).group(1)
         title = row.find(attrs={"data-field": "ad_title"}).get_text(strip=True)
         service_type = row.find(attrs={"data-field": "service_type"}).get_text(strip=True)
