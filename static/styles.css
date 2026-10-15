@@ -1,0 +1,298 @@
+:root {
+  --color-bg: #faf9f7;
+  --color-card: #ffffff;
+  --color-text: #2b2b2b;
+  --color-text-muted: #6b6b6b;
+  --color-border: #e5e2de;
+  --color-accent: #b5654d;
+  --color-accent-soft: rgba(181, 101, 77, 0.15);
+  --radius: 12px;
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 40px;
+  --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* hidden must always win, regardless of what display a class sets */
+[hidden] {
+  display: none !important;
+}
+
+/* literal values here, not var() - Firefox doesn't reliably resolve
+   custom properties inside ::selection/::-moz-selection */
+::-moz-selection {
+  background-color: rgba(181, 101, 77, 0.15);
+  color: #2b2b2b;
+}
+
+::selection {
+  background-color: rgba(181, 101, 77, 0.15);
+  color: #2b2b2b;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.kofi-widget {
+  position: fixed;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 12px;
+  background: var(--color-card);
+  border-radius: 7px;
+  box-shadow: var(--shadow-card);
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 36px;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.kofi-widget:hover {
+  opacity: 0.85;
+}
+
+.kofi-icon {
+  width: 22px;
+  height: 15px;
+  object-fit: contain;
+}
+
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+}
+
+.card {
+  background: var(--color-card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: var(--space-4);
+  width: 100%;
+  max-width: 420px;
+}
+
+h1 {
+  margin: 0 0 var(--space-1);
+  font-size: 1.5rem;
+}
+
+.subtitle {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+  font-size: 0.95rem;
+}
+
+.field {
+  position: relative;
+  margin-bottom: var(--space-2);
+}
+
+.suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin-top: 4px;
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.suggestions-list {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+
+.suggestions-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* Custom scroll indicator - replaces the native scrollbar so it can
+   actually fade in/out everywhere; Firefox's native scrollbar-color
+   can't be animated at all. */
+.scroll-thumb {
+  position: absolute;
+  top: 0;
+  right: 3px;
+  width: 8px;
+  border-radius: 4px;
+  background: var(--color-accent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.scroll-thumb.visible {
+  opacity: 0.6;
+}
+
+.suggestion {
+  padding: 8px 12px;
+  cursor: pointer;
+  background: transparent;
+  transition: background-color 0.15s ease;
+}
+
+.suggestion:hover,
+.suggestion.active {
+  background: var(--color-accent-soft);
+}
+
+.field label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+input[type="text"],
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="text"]:focus,
+select:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent-soft);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-primary:active {
+  opacity: 0.8;
+}
+
+.btn-primary:focus-visible {
+  outline: 3px solid var(--color-accent-soft);
+  outline-offset: 2px;
+}
+
+.btn-text {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  text-decoration: underline;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btn-text:hover {
+  color: var(--color-text);
+}
+
+.btn-text:focus-visible {
+  outline: 2px solid var(--color-accent-soft);
+  outline-offset: 2px;
+}
+
+.confirmation {
+  text-align: center;
+  color: var(--color-text);
+  background: var(--color-accent-soft);
+  border-radius: 8px;
+  padding: var(--space-2);
+  margin-bottom: var(--space-3);
+  font-size: 0.95rem;
+}
+
+.tag-container {
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  background: #fff;
+  min-height: 42px;
+  cursor: text;
+}
+
+.tag-list-plain {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: var(--space-1);
+}
+
+#city-display {
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 4px;
+  min-width: 80px;
+}
+
+.tag {
+  background: #f1ece9;
+  color: var(--color-text);
+  padding: 4px 10px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.tag .remove {
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-weight: bold;
+}
+
+.tag .remove:hover {
+  color: var(--color-accent);
+}

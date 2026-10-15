@@ -1,10 +1,11 @@
 import os
 
 from dotenv import load_dotenv
-from flask import Flask, redirect, render_template, request
+from flask import Flask, flash, redirect, render_template, request
 from itsdangerous import BadSignature, URLSafeSerializer
 
 import models
+from scraper import CITIES, CITY_LABELS
 
 load_dotenv()
 app = Flask(__name__)
@@ -44,7 +45,7 @@ def index():
         if not email:
             return redirect("/")
 
-        if not city:
+        if not city or city not in CITIES:
             return redirect("/")
 
         if not keywords_str:
@@ -57,10 +58,12 @@ def index():
 
         conn.commit()
 
+        flash("You're in! We'll email you when an ad matches your preferences.")
+
         return redirect("/")
 
     else:
-        return render_template("index.html")
+        return render_template("index.html", city_labels=CITY_LABELS)
 
 
 @app.route("/update", methods=["GET", "POST"])
@@ -88,7 +91,7 @@ def update():
         if not email:
             return redirect("/")
 
-        if not city:
+        if not city or city not in CITIES:
             return redirect("/")
 
         if not keywords_str:
@@ -122,5 +125,10 @@ def update():
         keywords = [row["keyword"] for row in rows]
 
         return render_template(
-            "change.html", email=email, city=city, keywords=keywords, token=token
+            "change.html",
+            email=email,
+            city=city,
+            keywords=keywords,
+            token=token,
+            city_labels=CITY_LABELS,
         )

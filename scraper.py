@@ -41,6 +41,41 @@ CITIES = [
     "las Vegas",
 ]
 
+# Consistent "City, State/Country" display labels for the raw values above,
+# since the site's own values aren't formatted consistently (some already
+# carry a state abbreviation, most don't).
+CITY_LABELS = {
+    "Atlanta": "Atlanta, Georgia",
+    "Austin": "Austin, Texas",
+    "Boston": "Boston, Massachusetts",
+    "Charlotte, NC": "Charlotte, North Carolina",
+    "Chicago": "Chicago, Illinois",
+    "Columbus, OH": "Columbus, Ohio",
+    "Dallas": "Dallas, Texas",
+    "Denver": "Denver, Colorado",
+    "Houston, TX": "Houston, Texas",
+    "Jersey City, NJ": "Jersey City, New Jersey",
+    "London (England)": "London, England",
+    "Los Angeles": "Los Angeles, California",
+    "Miami": "Miami, Florida",
+    "Minneapolis / St Paul": "Minneapolis / St. Paul, Minnesota",
+    "Montréal (Québec, Canada)": "Montréal, Canada",
+    "Nashville, TN": "Nashville, Tennessee",
+    "New York": "New York, New York",
+    "Philadelphia": "Philadelphia, Pennsylvania",
+    "San Diego, CA": "San Diego, California",
+    "San Francisco": "San Francisco, California",
+    "San Jose, CA": "San Jose, California",
+    "Scottsdale, AZ": "Scottsdale, Arizona",
+    "Seattle": "Seattle, Washington",
+    "St. Louis": "St. Louis, Missouri",
+    "Sydney (Australia)": "Sydney, Australia",
+    "Toronto (Ontario, Canada)": "Toronto, Canada",
+    "Vancouver (British Columbia, Canada)": "Vancouver, Canada",
+    "Washington DC": "Washington DC, USA",
+    "las Vegas": "Las Vegas, Nevada",
+}
+
 
 def get_soup(url, header_info=''):
     headers = {'user-agent' : header_info}

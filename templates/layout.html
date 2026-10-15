@@ -3,15 +3,27 @@
 <html lang="en">
 
     <head>
+        <meta charset="utf-8">
         <title>Salon Apprentice Alerts</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     </head>
 
     <body>
 
-        <main class="container py-5 text-center">
-            {% block main %}{% endblock %}
-        </main>
-        
+        <div class="page">
+            <main class="card">
+                {% block main %}{% endblock %}
+            </main>
+        </div>
+
+        <a href="https://ko-fi.com/C1W8282VCA" class="kofi-widget" target="_blank" rel="noopener">
+            <img src="{{ url_for('static', filename='kofi-logomark.webp') }}" alt="" class="kofi-icon">
+            Tip
+        </a>
+
     </body>
 
 </html>

@@ -2,21 +2,20 @@
 
 {% block main %}
 
-<div class="container">
-    <div class="section">
-        <h2>Manage your subscription</h2>
-        <form action="/update?token={{ token }}" method="post">
-            {% include "_subscription_form.html" %}
+<h1>Manage your subscription</h1>
+<p class="subtitle">Update your city or keywords, or unsubscribe entirely.</p>
 
-            <button type="submit" name="action" value="update">Save changes</button>
-            <button
-                type="submit"
-                name="action"
-                value="cancel"
-                onclick="return confirm('Unsubscribe from all alerts?')"
-            >Unsubscribe</button>
-        </form>
-    </div>
-</div>
+<form action="/update?token={{ token }}" method="post">
+    {% include "_subscription_form.html" %}
+
+    <button type="submit" name="action" value="update" class="btn-primary">Save changes</button>
+    <button
+        type="submit"
+        name="action"
+        value="cancel"
+        class="btn-text"
+        onclick="return confirm('Unsubscribe from all alerts?')"
+    >Unsubscribe</button>
+</form>
 
 {% endblock %}

@@ -1,73 +1,274 @@
-<select name="city" id="city">
-    <option value="Atlanta"{% if city == "Atlanta" %} selected{% endif %}>Atlanta, Georgia</option>
-    <option value="Austin"{% if city == "Austin" %} selected{% endif %}>Austin, Texas</option>
-    <option value="Boston"{% if city == "Boston" %} selected{% endif %}>Boston, Massachusetts</option>
-    <option value="Charlotte, NC"{% if city == "Charlotte, NC" %} selected{% endif %}>Charlotte, North Carolina</option>
-    <option value="Chicago"{% if city == "Chicago" %} selected{% endif %}>Chicago, Illinois</option>
-    <option value="Columbus, OH"{% if city == "Columbus, OH" %} selected{% endif %}>Columbus, Ohio</option>
-    <option value="Dallas"{% if city == "Dallas" %} selected{% endif %}>Dallas, Texas</option>
-    <option value="Denver"{% if city == "Denver" %} selected{% endif %}>Denver, Colorado</option>
-    <option value="Houston, TX"{% if city == "Houston, TX" %} selected{% endif %}>Houston, Texas</option>
-    <option value="Jersey City, NJ"{% if city == "Jersey City, NJ" %} selected{% endif %}>Jersey City, New Jersey</option>
-    <option value="las Vegas"{% if city == "las Vegas" %} selected{% endif %}>Las Vegas, Nevada</option>
-    <option value="London (England)"{% if city == "London (England)" %} selected{% endif %}>London, England</option>
-    <option value="Los Angeles"{% if city == "Los Angeles" %} selected{% endif %}>Los Angeles, California</option>
-    <option value="Miami"{% if city == "Miami" %} selected{% endif %}>Miami, Florida</option>
-    <option value="Minneapolis / St Paul"{% if city == "Minneapolis / St Paul" %} selected{% endif %}>Minneapolis / St. Paul, Minnesota</option>
-    <option value="Montréal (Québec, Canada)"{% if city == "Montréal (Québec, Canada)" %} selected{% endif %}>Montréal, Canada</option>
-    <option value="Nashville, TN"{% if city == "Nashville, TN" %} selected{% endif %}>Nashville, Tennessee</option>
-    <option value="New York"{% if city == "New York" %} selected{% endif %}>New York, New York</option>
-    <option value="Philadelphia"{% if city == "Philadelphia" %} selected{% endif %}>Philadelphia, Pennsylvania</option>
-    <option value="San Diego, CA"{% if city == "San Diego, CA" %} selected{% endif %}>San Diego, California</option>
-    <option value="San Francisco"{% if city == "San Francisco" %} selected{% endif %}>San Francisco, California</option>
-    <option value="San Jose, CA"{% if city == "San Jose, CA" %} selected{% endif %}>San Jose, California</option>
-    <option value="Scottsdale, AZ"{% if city == "Scottsdale, AZ" %} selected{% endif %}>Scottsdale, Arizona</option>
-    <option value="Seattle"{% if city == "Seattle" %} selected{% endif %}>Seattle, Washington</option>
-    <option value="St. Louis"{% if city == "St. Louis" %} selected{% endif %}>St. Louis, Missouri</option>
-    <option value="Sydney (Australia)"{% if city == "Sydney (Australia)" %} selected{% endif %}>Sydney, Australia</option>
-    <option value="Toronto (Ontario, Canada)"{% if city == "Toronto (Ontario, Canada)" %} selected{% endif %}>Toronto, Canada</option>
-    <option value="Vancouver (British Columbia, Canada)"{% if city == "Vancouver (British Columbia, Canada)" %} selected{% endif %}>Vancouver, Canada</option>
-    <option value="Washington DC"{% if city == "Washington DC" %} selected{% endif %}>Washington DC, United States of America</option>
-</select>
-
-<input name="email" type="text" placeholder="Email address" value="{{ email|default('') }}">
-
-<div class="tag-container">
-    <div id="tag-list"></div>
-    <input type="text" id="tag-input" placeholder="Keyword...">
-    <!-- Hidden input that holds the comma-joined keyword list for form submission -->
-    <input type="hidden" name="keywords" id="hidden-keywords">
+<div class="field">
+    <label for="email">Email</label>
+    <input name="email" type="text" id="email" placeholder="you@example.com" value="{{ email|default('') }}">
 </div>
 
-<style>
-  .tag-container {
-    border: 1px solid #ccc;
-    padding: 5px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    background: #fff;
-  }
-  #tag-input {
-    border: none;
-    outline: none;
-    flex-grow: 1;
-  }
-  .tag {
-    background: #e0e0e0;
-    padding: 2px 8px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-  .tag .remove {
-    cursor: pointer;
-    color: red;
-  }
-</style>
+<div class="field">
+    <label for="city-display">City</label>
+    <div class="tag-container" id="city-tag-container">
+        <span
+            class="tag"
+            id="city-pill"
+            tabindex="0"
+            role="button"
+            {% if not city %}hidden{% endif %}
+        >
+            <span id="city-pill-label">{{ city_labels.get(city, '') if city else '' }}</span>
+            <span class="remove" id="city-pill-remove">&times;</span>
+        </span>
+        <input
+            type="text"
+            id="city-display"
+            placeholder="Start typing your city"
+            value="{{ city_labels.get(city, '') if city else '' }}"
+            autocomplete="off"
+            {% if city %}hidden{% endif %}
+        >
+    </div>
+    <!-- Hidden input that holds the real scraping value, kept in sync by the script below -->
+    <input type="hidden" name="city" id="city" value="{{ city|default('') }}">
+    <div id="city-suggestions" class="suggestions" hidden>
+        <div id="city-suggestions-list" class="suggestions-list"></div>
+        <div id="city-scroll-thumb" class="scroll-thumb"></div>
+    </div>
+</div>
+
+<div class="field">
+    <label for="tag-input">Keywords</label>
+    <input type="text" id="tag-input" placeholder="Type a keyword and press Enter">
+    <!-- Hidden input that holds the comma-joined keyword list for form submission -->
+    <input type="hidden" name="keywords" id="hidden-keywords">
+    <div id="tag-list" class="tag-list-plain"></div>
+</div>
 
 <script>
+  const cityDisplay = document.getElementById('city-display');
+  const cityHidden = document.getElementById('city');
+  const citySuggestions = document.getElementById('city-suggestions');
+  const citySuggestionsList = document.getElementById('city-suggestions-list');
+  const cityScrollThumb = document.getElementById('city-scroll-thumb');
+  const cityTagContainer = document.getElementById('city-tag-container');
+  const cityPill = document.getElementById('city-pill');
+  const cityPillLabel = document.getElementById('city-pill-label');
+  const cityPillRemove = document.getElementById('city-pill-remove');
+  const rawToLabel = {{ city_labels|tojson }};
+  const labelToRaw = Object.fromEntries(
+    Object.entries(rawToLabel).map(([raw, label]) => [label, raw])
+  );
+  const allCityLabels = Object.values(rawToLabel);
+
+  function updateCityScrollThumb() {
+    const list = citySuggestionsList;
+
+    if (list.scrollHeight <= list.clientHeight) {
+      cityScrollThumb.style.height = '0px';
+      return;
+    }
+
+    const thumbHeight = Math.max(20, (list.clientHeight / list.scrollHeight) * list.clientHeight);
+    const maxThumbTop = list.clientHeight - thumbHeight;
+    const scrollRatio = list.scrollTop / (list.scrollHeight - list.clientHeight);
+
+    cityScrollThumb.style.height = thumbHeight + 'px';
+    cityScrollThumb.style.top = (scrollRatio * maxThumbTop) + 'px';
+  }
+
+  let scrollFadeTimeout;
+  citySuggestionsList.addEventListener('scroll', function() {
+    updateCityScrollThumb();
+    cityScrollThumb.classList.add('visible');
+    clearTimeout(scrollFadeTimeout);
+    scrollFadeTimeout = setTimeout(function() {
+      cityScrollThumb.classList.remove('visible');
+    }, 600);
+  });
+
+  let cityMatches = [];
+  let activeCityIndex = -1;
+
+  function closeCitySuggestions() {
+    citySuggestionsList.innerHTML = '';
+    citySuggestions.hidden = true;
+    cityMatches = [];
+    activeCityIndex = -1;
+  }
+
+  function selectCity(label) {
+    cityHidden.value = labelToRaw[label] || '';
+    cityPillLabel.textContent = label;
+    cityPill.hidden = false;
+    cityDisplay.hidden = true;
+    cityDisplay.value = '';
+    closeCitySuggestions();
+  }
+
+  function clearCity() {
+    cityHidden.value = '';
+    cityPill.hidden = true;
+    cityDisplay.hidden = false;
+    cityDisplay.value = '';
+    cityDisplay.focus();
+  }
+
+  function editCity() {
+    const currentLabel = cityPillLabel.textContent;
+    cityPill.hidden = true;
+    cityDisplay.hidden = false;
+    cityDisplay.value = currentLabel;
+    cityDisplay.focus();
+    showCitySuggestions(currentLabel);
+  }
+
+  cityTagContainer.addEventListener('click', function(e) {
+    if (e.target === cityPillRemove) {
+      return; // handled by its own listener below
+    }
+    if (!cityPill.hidden) {
+      editCity();
+    } else {
+      cityDisplay.focus();
+    }
+  });
+
+  cityPill.addEventListener('keydown', function(e) {
+    // Tab lands focus on the pill itself; Enter/Space is what "activates"
+    // it, same as a real button - a focused span doesn't respond to
+    // either on its own.
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      editCity();
+    }
+  });
+
+  cityPillRemove.addEventListener('click', function(e) {
+    // stop this from also bubbling up to the container's click handler,
+    // which would reopen edit mode right after clearing it
+    e.stopPropagation();
+    clearCity();
+  });
+
+  function highlightActiveCity() {
+    Array.from(citySuggestionsList.children).forEach((child, index) => {
+      child.classList.toggle('active', index === activeCityIndex);
+    });
+
+    const activeEl = citySuggestionsList.children[activeCityIndex];
+    if (activeEl) {
+      activeEl.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function showCitySuggestions(filterText) {
+    citySuggestionsList.innerHTML = '';
+    activeCityIndex = -1;
+
+    cityMatches = filterText
+      ? allCityLabels.filter((label) => label.toLowerCase().includes(filterText.toLowerCase()))
+      : allCityLabels;
+
+    cityMatches.forEach((label, index) => {
+      const item = document.createElement('div');
+      item.classList.add('suggestion');
+      item.textContent = label;
+
+      // mousedown (not click) fires before the input's blur, so the
+      // selection registers before the dropdown gets cleared below.
+      item.addEventListener('mousedown', function(e) {
+        e.preventDefault();
+        selectCity(label);
+      });
+
+      // hovering an item makes it "active" too, so Enter selects
+      // whichever one the mouse is over, not just arrow-key navigation.
+      item.addEventListener('mouseenter', function() {
+        activeCityIndex = index;
+        highlightActiveCity();
+      });
+
+      item.addEventListener('mouseleave', function() {
+        if (activeCityIndex === index) {
+          activeCityIndex = -1;
+          highlightActiveCity();
+        }
+      });
+
+      citySuggestionsList.appendChild(item);
+    });
+
+    citySuggestions.hidden = cityMatches.length === 0;
+    updateCityScrollThumb();
+  }
+
+  cityDisplay.addEventListener('input', function() {
+    const matchedRaw = labelToRaw[cityDisplay.value] || '';
+
+    if (matchedRaw) {
+      // what's typed is a complete, exact match - lock it in as a pill
+      // without waiting for a click or Enter.
+      selectCity(cityDisplay.value);
+    } else {
+      cityHidden.value = '';
+      showCitySuggestions(cityDisplay.value);
+    }
+  });
+
+  cityDisplay.addEventListener('blur', function() {
+    const matchedRaw = labelToRaw[cityDisplay.value] || '';
+
+    if (matchedRaw) {
+      // valid city left in the field when focus moves away - commit it
+      // as a pill, same as pressing Enter would.
+      selectCity(cityDisplay.value);
+    } else {
+      closeCitySuggestions();
+    }
+  });
+
+  cityDisplay.addEventListener('keydown', function(e) {
+    if (e.key === 'ArrowDown' && !cityMatches.length) {
+      // dropdown is closed - open it (full list if empty, filtered if typed)
+      // without moving a selection yet, same as a native closed dropdown.
+      e.preventDefault();
+      showCitySuggestions(cityDisplay.value);
+      return;
+    }
+
+    if (!cityMatches.length) {
+      return;
+    }
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      activeCityIndex = (activeCityIndex + 1) % cityMatches.length;
+      highlightActiveCity();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeCityIndex = (activeCityIndex - 1 + cityMatches.length) % cityMatches.length;
+      highlightActiveCity();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (activeCityIndex >= 0) {
+        selectCity(cityMatches[activeCityIndex]);
+      } else if (labelToRaw[cityDisplay.value]) {
+        // nothing arrow-highlighted, but what's currently in the field
+        // (typed, or untouched from entering edit mode) is a real city -
+        // lock it back in as a pill.
+        selectCity(cityDisplay.value);
+      }
+    } else if (e.key === 'Escape') {
+      closeCitySuggestions();
+      cityDisplay.value = '';
+
+      if (cityPillLabel.textContent) {
+        // there was a previously selected city - revert back to it
+        // instead of leaving an empty, unconfirmed-looking text box.
+        cityDisplay.hidden = true;
+        cityPill.hidden = false;
+        cityPill.focus();
+      }
+    }
+  });
+
   const tagInput = document.getElementById('tag-input');
   const tagList = document.getElementById('tag-list');
   const hiddenKeywords = document.getElementById('hidden-keywords');
@@ -75,6 +276,7 @@
 
   function renderTags() {
     tagList.innerHTML = '';
+    tagList.hidden = keywordsArray.length === 0;
     keywordsArray.forEach((tag, index) => {
       const tagEl = document.createElement('span');
       tagEl.classList.add('tag');
@@ -98,6 +300,9 @@
         renderTags();
         tagInput.value = '';
       }
+    } else if (e.key === 'Backspace' && tagInput.value === '' && keywordsArray.length > 0) {
+      keywordsArray.pop();
+      renderTags();
     }
   });
 
