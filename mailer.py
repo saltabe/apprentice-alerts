@@ -131,7 +131,7 @@ def _build_html_body(email, ads):
       <body style="margin: 0; padding: 0; background: {_BG};">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: {_BG};">
           <tr>
-            <td align="center" style="padding: 32px 16px;">
+            <td align="center" style="padding: 32px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
                 <tr><td style="padding: 0 0 4px;">{intro}</td></tr>
                 {cards}
