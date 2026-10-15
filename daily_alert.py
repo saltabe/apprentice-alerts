@@ -10,24 +10,24 @@ import models
 import scraper
 
 
-def build_tables(conn):
+def _build_tables(conn):
     models.init_db(conn)
 
 
-def filter_ads(conn):
+def _filter_ads(conn):
     ads = scraper.loop_cities()
 
     return [ad for ad in ads if not models.select_ad(conn, ad["edit_id"])]
 
 
-def save_ads(conn, ads):
+def _save_ads(conn, ads):
     for ad in ads:
         models.insert_ad(conn, **ad)
 
     conn.commit()
 
 
-def get_relevant_users(conn, ads):
+def _get_relevant_users(conn, ads):
     users = models.select_all_users(conn)
 
     matches = {}
@@ -48,7 +48,7 @@ def get_relevant_users(conn, ads):
     return matches
 
 
-def send_alerts(matches):
+def _send_alerts(matches):
     for email, ads in matches.items():
         try:
             mailer.write_email(email, ads)
@@ -60,13 +60,13 @@ def send_alerts(matches):
 
 def main():
     conn = models.get_connection()
-    build_tables(conn)
+    _build_tables(conn)
 
-    ads = filter_ads(conn)
-    save_ads(conn, ads)
+    ads = _filter_ads(conn)
+    _save_ads(conn, ads)
 
-    matches = get_relevant_users(conn, ads)
-    send_alerts(matches)
+    matches = _get_relevant_users(conn, ads)
+    _send_alerts(matches)
 
 
 if __name__ == "__main__":

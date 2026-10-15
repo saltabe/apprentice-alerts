@@ -10,10 +10,10 @@ from dotenv import load_dotenv
 from itsdangerous import URLSafeSerializer
 
 load_dotenv()
-secret_key = os.environ.get("SECRET_KEY")
-serializer = URLSafeSerializer(secret_key)
+_secret_key = os.environ.get("SECRET_KEY")
+_serializer = URLSafeSerializer(_secret_key)
 
-URL = "https://apprentice.saltable.fyi"
+_URL = "https://apprentice.saltable.fyi"
 
 _NUMBER_WORDS = {1: "One", 2: "Two", 3: "Three", 4: "Four", 5: "Five", 6: "Six", 7: "Seven", 8: "Eight", 9: "Nine"}
 
@@ -27,17 +27,17 @@ _BG = "#faf9f7"
 _CARD_BG = "#ffffff"
 
 
-def encode_token(email):
-    return serializer.dumps(email)
+def _encode_token(email):
+    return _serializer.dumps(email)
 
 
-def get_user_url(email):
-    token = encode_token(email)
+def _get_user_url(email):
+    token = _encode_token(email)
 
-    return URL + "/update?token=" + token
+    return _URL + "/update?token=" + token
 
 
-def get_listing_url(ad):
+def _get_listing_url(ad):
     return (
         "https://www.salonapprentice.com/free-salon-services/"
         f"SalonApprentice_view.php?editid1={ad['edit_id']}"
@@ -66,11 +66,11 @@ def _intro_text(ads):
     return f"{word} new {noun} matching your preferences:"
 
 
-def build_plain_body(email, ads):
+def _build_plain_body(email, ads):
     lines = [_intro_text(ads), ""]
 
     for ad in ads:
-        url = get_listing_url(ad)
+        url = _get_listing_url(ad)
 
         lines.append(ad["title"])
 
@@ -81,13 +81,13 @@ def build_plain_body(email, ads):
         lines.append(url)
         lines.append("")
 
-    lines.append(f"Update your subscription or unsubscribe from our emails: {get_user_url(email)}")
+    lines.append(f"Update your subscription or unsubscribe from our emails: {_get_user_url(email)}")
 
     return "\n".join(lines)
 
 
 def _build_ad_card(ad):
-    url = escape(get_listing_url(ad))
+    url = escape(_get_listing_url(ad))
     title = escape(ad["title"])
     details = " &middot; ".join(escape(value) for value in _ad_details(ad))
 
@@ -108,12 +108,12 @@ def _build_ad_card(ad):
     """
 
 
-def build_html_body(email, ads):
+def _build_html_body(email, ads):
     intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">{escape(_intro_text(ads))}</p>'
 
     cards = "".join(_build_ad_card(ad) for ad in ads)
 
-    manage_url = escape(get_user_url(email))
+    manage_url = escape(_get_user_url(email))
     footer = f"""
     <tr>
       <td style="padding: 16px 0 0; border-top: 1px solid {_BORDER};">
@@ -139,12 +139,12 @@ def build_html_body(email, ads):
     """
 
 
-def send_email(email, subject, plain_body, html_body):
+def _send_email(email, subject, plain_body, html_body):
     msg = EmailMessage()
     msg["Subject"] = subject
     msg["From"] = os.environ.get("ALERTS_FROM_EMAIL")
     msg["To"] = email
-    msg["List-Unsubscribe"] = f"<{get_user_url(email)}>"
+    msg["List-Unsubscribe"] = f"<{_get_user_url(email)}>"
     msg.set_content(plain_body)
     msg.add_alternative(html_body, subtype="html")
 
@@ -156,7 +156,7 @@ def send_email(email, subject, plain_body, html_body):
 
 def write_email(email, ads):
     subject = "New listings from Salon Apprentice"
-    plain_body = build_plain_body(email, ads)
-    html_body = build_html_body(email, ads)
+    plain_body = _build_plain_body(email, ads)
+    html_body = _build_html_body(email, ads)
 
-    send_email(email, subject, plain_body, html_body)
+    _send_email(email, subject, plain_body, html_body)

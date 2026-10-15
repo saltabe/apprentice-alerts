@@ -12,15 +12,15 @@ def get_connection():
 
 
 def init_db(conn):
-    create_users_table(conn)
-    create_ads_table(conn)
+    _create_users_table(conn)
+    _create_ads_table(conn)
 
 
 # ---------------------------------------------------------------------------
 # Users table
 # ---------------------------------------------------------------------------
 
-def create_users_table(conn):
+def _create_users_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS users (
             email TEXT
@@ -65,7 +65,7 @@ def delete_user(conn, email):
 # Ads table
 # ---------------------------------------------------------------------------
 
-def create_ads_table(conn):
+def _create_ads_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ads (
             edit_id INTEGER PRIMARY KEY
