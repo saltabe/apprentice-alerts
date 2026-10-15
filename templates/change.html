@@ -7,7 +7,7 @@
 {% endfor %}
 
 {% if not unsubscribed %}
-<h1>Manage your subscription</h1>
+<h1>Update your subscription</h1>
 
 <form action="/update?token={{ token }}" method="post">
     {% include "_subscription_form.html" %}
