@@ -84,6 +84,7 @@ def update():
         if action == "cancel":
             models.delete_user(conn, old_email)
             conn.commit()
+            flash("You've been unsubscribed.")
             return redirect("/")
 
         # below code is for if user modifies subscription
@@ -109,6 +110,8 @@ def update():
             models.insert_user(conn, email, city, keyword)
 
         conn.commit()
+
+        flash("Your subscription has been updated.")
 
         return redirect("/")
 
