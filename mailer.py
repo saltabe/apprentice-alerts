@@ -33,6 +33,23 @@ def get_listing_url(ad):
     )
 
 
+def _format_fee(fee):
+    if fee == "No":
+        return "Free"
+
+    if fee == "Yes":
+        return "Fee required"
+
+    return fee
+
+
+def _ad_details(ad):
+    # blank fields (e.g. no salon listed) are dropped rather than shown as empty
+    values = [ad["service_type"], _format_fee(ad["fee"]), ad["salon"], ad["neighborhood"], ad["next_service_date"]]
+
+    return [value for value in values if value]
+
+
 def build_plain_body(email, ads):
     lines = ["New listings that match your preferences:", ""]
 
@@ -40,11 +57,10 @@ def build_plain_body(email, ads):
         url = get_listing_url(ad)
 
         lines.append(ad["title"])
-        lines.append(f"- {ad['service_type']}")
-        lines.append(f"- {ad['fee']}")
-        lines.append(f"- {ad['salon']}")
-        lines.append(f"- {ad['neighborhood']}")
-        lines.append(f"- {ad['next_service_date']}")
+
+        for detail in _ad_details(ad):
+            lines.append(f"- {detail}")
+
         lines.append("")
         lines.append(url)
         lines.append("")
@@ -68,10 +84,7 @@ _ACCENT = "#b5654d"
 def _build_ad_card(ad):
     url = escape(get_listing_url(ad))
     title = escape(ad["title"])
-    details = " &middot; ".join(
-        escape(value)
-        for value in [ad["service_type"], ad["fee"], ad["salon"], ad["neighborhood"], ad["next_service_date"]]
-    )
+    details = " &middot; ".join(escape(value) for value in _ad_details(ad))
 
     return f"""
     <tr>
