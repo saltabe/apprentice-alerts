@@ -13,7 +13,7 @@ load_dotenv()
 secret_key = os.environ.get("SECRET_KEY")
 serializer = URLSafeSerializer(secret_key)
 
-URL = "https://apprenticealerts.saltable.fyi"  # TODO: point this at your host once chosen
+URL = "https://apprentice.saltable.fyi"
 
 
 def encode_token(email):

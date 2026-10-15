@@ -15,7 +15,7 @@ jobs:
           curl --fail --silent --show-error \
             -X POST \
             -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
-            https://apprenticealerts.saltable.fyi/run-daily-alert
+            https://apprentice.saltable.fyi/run-daily-alert
 
   workflow-keepalive:
     if: github.event_name == 'schedule'
