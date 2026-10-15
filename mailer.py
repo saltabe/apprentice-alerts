@@ -99,7 +99,7 @@ def _build_ad_card(ad):
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
                style="background: {_CARD_BG}; border: 1px solid {_BORDER}; border-radius: 12px;">
           <tr>
-            <td style="padding: 16px 20px; text-align: center;">
+            <td style="padding: 16px 20px;">
               <a href="{url}" style="margin: 0 0 6px; display: block; font-size: 16px; font-weight: 600; color: {_TEXT}; text-decoration: none; {_FONT}">{title}</a>
               <p style="margin: 0; font-size: 13px; color: {_MUTED}; {_FONT}">{details}</p>
             </td>
