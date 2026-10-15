@@ -38,7 +38,7 @@ def _format_fee(fee):
         return "Free"
 
     if fee == "Yes":
-        return "Paid"
+        return "Discounted"
 
     return fee
 
