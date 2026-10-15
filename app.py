@@ -163,6 +163,11 @@ def run_daily_alert():
         raise
 
     if healthcheck_url:
-        requests.get(healthcheck_url, timeout=10)
+        try:
+            requests.get(healthcheck_url, timeout=10)
+        except requests.RequestException:
+            # the alert already succeeded; don't fail the whole request
+            # just because the healthcheck ping itself had a blip
+            pass
 
     return "ok", 200

@@ -1,6 +1,9 @@
 # Entry point for the daily job: scrape -> match against subscriptions -> email.
-# Meant to be run on a schedule (cron, or your host's scheduled-job feature),
-# not inside the Flask app itself.
+# Called by app.py's /run-daily-alert route (triggered on a schedule by the
+# GitHub Actions workflow), since the app process is the only one with access
+# to the persistent disk the database lives on.
+
+import sys
 
 import mailer
 import models
@@ -45,7 +48,12 @@ def get_relevant_users(conn, ads):
 
 def send_alerts(matches):
     for email, ads in matches.items():
-        mailer.write_email(email, ads)
+        try:
+            mailer.write_email(email, ads)
+        except Exception as e:
+            # one bad address or a transient SMTP error shouldn't stop
+            # everyone else in the batch from getting their alert
+            print(f"Failed to send alert to {email}: {e}", file=sys.stderr)
 
 
 def main():
