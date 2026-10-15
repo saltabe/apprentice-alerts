@@ -1,10 +1,11 @@
 # Database schema and access helpers, shared by app.py and daily_alert.py.
 
+import os
 import sqlite3
 
 
 def get_connection():
-    conn = sqlite3.connect("users.db")
+    conn = sqlite3.connect(os.environ.get("DB_PATH", "users.db"))
     conn.row_factory = sqlite3.Row
 
     return conn
