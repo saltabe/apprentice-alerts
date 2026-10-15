@@ -119,7 +119,7 @@ def _build_html_body(email, ads):
     footer = f"""
     <tr>
       <td style="padding: 16px 0 0; border-top: 1px solid {_BORDER};">
-        <p style="margin: 16px 0 0; font-size: 13px; color: {_MUTED}; {_FONT}">
+        <p style="margin: 16px 0 0; font-size: 12px; color: {_MUTED}; {_FONT}">
           <a href="{manage_url}" style="color: {_MUTED};">Update your subscription or unsubscribe</a> from our emails.
         </p>
       </td>
