@@ -54,34 +54,72 @@ def build_plain_body(email, ads):
     return "\n".join(lines)
 
 
-def build_html_body(email, ads):
-    intro = "<p>New listings that match your preferences</p>"
+# email clients mostly ignore <style> blocks and external CSS, so every
+# rule here has to be inline; these mirror static/styles.css's palette
+_FONT = "font-family: -apple-system, 'Helvetica Neue', Helvetica, Arial, sans-serif;"
+_TEXT = "#2b2b2b"
+_MUTED = "#6b6b6b"
+_BORDER = "#e5e2de"
+_BG = "#faf9f7"
+_CARD_BG = "#ffffff"
+_ACCENT = "#b5654d"
 
-    header = (
-        "<tr><th>Title</th><th>Service Type</th><th>Fee</th>"
-        "<th>Salon</th><th>Neighborhood</th><th>Date</th></tr>"
+
+def _build_ad_card(ad):
+    url = escape(get_listing_url(ad))
+    title = escape(ad["title"])
+    details = " &middot; ".join(
+        escape(value)
+        for value in [ad["service_type"], ad["fee"], ad["salon"], ad["neighborhood"], ad["next_service_date"]]
     )
-    rows = [header]
 
-    for ad in ads:
-        url = escape(get_listing_url(ad))
+    return f"""
+    <tr>
+      <td style="padding: 0 0 16px;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+               style="background: {_CARD_BG}; border: 1px solid {_BORDER}; border-radius: 12px;">
+          <tr>
+            <td style="padding: 16px 20px;">
+              <p style="margin: 0 0 6px; font-size: 16px; font-weight: 600; color: {_TEXT}; {_FONT}">{title}</p>
+              <p style="margin: 0 0 12px; font-size: 13px; color: {_MUTED}; {_FONT}">{details}</p>
+              <a href="{url}" style="font-size: 14px; font-weight: 600; color: {_ACCENT}; text-decoration: none; {_FONT}">View listing &rarr;</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    """
 
-        values = [
-            ad["title"],
-            ad["service_type"],
-            ad["fee"],
-            ad["salon"],
-            ad["neighborhood"],
-            ad["next_service_date"],
-        ]
-        cells = "".join(f'<td><a href="{url}">{escape(value)}</a></td>' for value in values)
 
-        rows.append("<tr>" + cells + "</tr>")
+def build_html_body(email, ads):
+    intro = f'<p style="margin: 0 0 20px; font-size: 15px; color: {_TEXT}; {_FONT}">New listings that match your preferences</p>'
+
+    cards = "".join(_build_ad_card(ad) for ad in ads)
 
     manage_url = escape(get_user_url(email))
-    footer = f'<p><a href="{manage_url}">Update your subscription or unsubscribe</a> from our emails.</p>'
+    footer = f"""
+    <tr>
+      <td style="padding: 16px 0 0; border-top: 1px solid {_BORDER};">
+        <p style="margin: 16px 0 0; font-size: 13px; color: {_MUTED}; {_FONT}">
+          <a href="{manage_url}" style="color: {_MUTED};">Update your subscription or unsubscribe</a> from our emails.
+        </p>
+      </td>
+    </tr>
+    """
 
-    return intro + "<table>" + "".join(rows) + "</table>" + footer
+    return f"""
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background: {_BG}; padding: 32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px;">
+            <tr><td style="padding: 0 0 4px;">{intro}</td></tr>
+            {cards}
+            {footer}
+          </table>
+        </td>
+      </tr>
+    </table>
+    """
 
 
 def send_email(email, subject, plain_body, html_body):
