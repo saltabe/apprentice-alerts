@@ -75,8 +75,6 @@ def create_ads_table(conn):
             , salon TEXT
             , neighborhood TEXT
             , next_service_date TEXT
-            -- updated daily after all emails are sent
-            , sent NUMERIC
             )
     """)
 
@@ -93,14 +91,8 @@ def insert_ad(conn, edit_id, title, service_type, fee, salon, neighborhood, next
             , next_service_date
             )
         VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (edit_id, title, service_type, fee, salon, neighborhood, next_service_date)
-    # sent is left null to indicate no
-    )
+    """, (edit_id, title, service_type, fee, salon, neighborhood, next_service_date))
 
 
 def select_ad(conn, edit_id):
     return conn.execute("SELECT * FROM ads WHERE edit_id = ?", (edit_id,)).fetchone()
-
-
-def update_ad(conn, edit_id):
-    conn.execute("UPDATE ads SET sent = 1 WHERE edit_id = ?", (edit_id,))

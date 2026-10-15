@@ -48,13 +48,6 @@ def send_alerts(matches):
         mailer.write_email(email, ads)
 
 
-def mark_ads_sent(conn, ads):
-    for ad in ads:
-        models.update_ad(conn, ad["edit_id"])
-
-    conn.commit()
-
-
 def main():
     conn = models.get_connection()
     build_tables(conn)
@@ -64,8 +57,6 @@ def main():
 
     matches = get_relevant_users(conn, ads)
     send_alerts(matches)
-
-    mark_ads_sent(conn, ads)
 
 
 if __name__ == "__main__":
