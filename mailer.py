@@ -75,7 +75,6 @@ _MUTED = "#6b6b6b"
 _BORDER = "#e5e2de"
 _BG = "#faf9f7"
 _CARD_BG = "#ffffff"
-_ACCENT = "#b5654d"
 
 
 def _build_ad_card(ad):
@@ -90,7 +89,7 @@ def _build_ad_card(ad):
                style="background: {_CARD_BG}; border: 1px solid {_BORDER}; border-radius: 12px;">
           <tr>
             <td style="padding: 16px 20px;">
-              <a href="{url}" style="margin: 0 0 6px; display: block; font-size: 16px; font-weight: 600; color: {_ACCENT}; text-decoration: none; {_FONT}">{title}</a>
+              <a href="{url}" style="margin: 0 0 6px; display: block; font-size: 16px; font-weight: 600; color: {_TEXT}; text-decoration: none; {_FONT}">{title}</a>
               <p style="margin: 0; font-size: 13px; color: {_MUTED}; {_FONT}">{details}</p>
             </td>
           </tr>
