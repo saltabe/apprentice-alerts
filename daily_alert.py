@@ -33,8 +33,10 @@ def get_relevant_users(conn, ads):
     matches = {}
 
     for ad in ads:
+        searchable = f"{ad['title']} {ad['service_type']}".lower()
+
         for row in users:
-            if row["keyword"].lower() in ad["title"].lower():
+            if row["keyword"].lower() in searchable:
                 email = row["email"]
 
                 if email not in matches:
