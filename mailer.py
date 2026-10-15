@@ -34,7 +34,7 @@ def get_listing_url(ad):
 
 
 def build_plain_body(email, ads):
-    lines = ["New listings that match your specifications", ""]
+    lines = ["New listings that match your preferences", ""]
 
     for ad in ads:
         url = get_listing_url(ad)
@@ -55,7 +55,7 @@ def build_plain_body(email, ads):
 
 
 def build_html_body(email, ads):
-    intro = "<p>New listings that match your specifications</p>"
+    intro = "<p>New listings that match your preferences</p>"
 
     header = (
         "<tr><th>Title</th><th>Service Type</th><th>Fee</th>"
@@ -99,7 +99,7 @@ def send_email(email, subject, plain_body, html_body):
 
 
 def write_email(email, ads):
-    subject = "New listings from Apprentice Alerts"
+    subject = "New listings from Salon Apprentice"
     plain_body = build_plain_body(email, ads)
     html_body = build_html_body(email, ads)
 
