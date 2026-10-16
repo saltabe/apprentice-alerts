@@ -149,10 +149,15 @@ def run_daily_alert():
 
     try:
         daily_alert.main()
-    except Exception:
+    except Exception as e:
         if healthcheck_url:
-            requests.get(healthcheck_url + "/fail", timeout=10)
-        raise
+            try:
+                requests.get(healthcheck_url + "/fail", timeout=10)
+            except requests.RequestException:
+                pass
+        # this endpoint is gated by CRON_SECRET, not public-facing, so it's
+        # safe to return the actual error instead of a bare 500
+        return f"error: {e}", 500
 
     if healthcheck_url:
         try:
