@@ -1,9 +1,8 @@
 name: Daily alert
 
-# scheduling moved to a Render Cron Job for more precise timing - kept as
-# workflow_dispatch only, for manual testing
-
 on:
+  schedule:
+    - cron: "7 15 * * *" # ~10:07am EST / 11:07am EDT, matching Salon Apprentice's own send time; GitHub runs schedules late, worst at the top of the hour
   workflow_dispatch:
 
 jobs:
@@ -17,3 +16,11 @@ jobs:
             -X POST \
             -H "X-Cron-Secret: ${{ secrets.CRON_SECRET }}" \
             https://apprentice.saltable.fyi/run-daily-alert
+
+  workflow-keepalive:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - uses: liskin/gh-workflow-keepalive@v1
