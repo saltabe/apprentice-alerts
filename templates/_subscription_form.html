@@ -38,7 +38,6 @@
     <input type="text" id="tag-input" placeholder="Type a keyword and press Enter">
     <!-- Hidden input that holds the comma-joined keyword list for form submission -->
     <input type="hidden" name="keywords" id="hidden-keywords">
-    <div id="keyword-suggestions" class="suggestion-chips"></div>
     <div id="tag-list" class="tag-list-plain"></div>
 </div>
 
@@ -273,43 +272,82 @@
   const tagInput = document.getElementById('tag-input');
   const tagList = document.getElementById('tag-list');
   const hiddenKeywords = document.getElementById('hidden-keywords');
-  const keywordSuggestions = document.getElementById('keyword-suggestions');
   const suggestedKeywords = ['curly', 'color', 'balayage'];
   let keywordsArray = {{ keywords|default([])|tojson }};
 
-  function renderKeywordSuggestions() {
-    keywordSuggestions.innerHTML = '';
+  function removeTag(index) {
+    keywordsArray.splice(index, 1);
+    renderTags();
+  }
 
+  // converts a suggestion chip into a real tag in place, same DOM element,
+  // same position, same size - nothing is destroyed or moved
+  function convertSuggestionChip(chip, keyword) {
+    chip.classList.remove('suggestion-chip');
+    chip.classList.add('tag');
+    chip.disabled = true;
+    delete chip.dataset.keyword;
+
+    const remove = document.createElement('span');
+    remove.classList.add('remove');
+    remove.innerHTML = '&times;';
+    remove.addEventListener('click', function() {
+      removeTag(keywordsArray.indexOf(keyword));
+    });
+    chip.appendChild(remove);
+  }
+
+  function addKeyword(value) {
+    if (!value || keywordsArray.includes(value)) {
+      return;
+    }
+
+    // works the same whether the keyword came from clicking a chip or
+    // typing text that happens to match one currently on screen
+    const existingChip = tagList.querySelector(`[data-keyword="${value}"]`);
+
+    if (existingChip) {
+      convertSuggestionChip(existingChip, value);
+      keywordsArray.push(value);
+      hiddenKeywords.value = keywordsArray.join(',');
+    } else {
+      keywordsArray.push(value);
+      renderTags(true);
+    }
+  }
+
+  function renderSuggestionChips() {
     const remaining = suggestedKeywords.filter((kw) => !keywordsArray.includes(kw));
-    keywordSuggestions.hidden = remaining.length === 0;
+
+    const existingLabel = tagList.querySelector('.suggestion-label');
+    if (existingLabel) {
+      existingLabel.remove();
+    }
+
+    if (remaining.length === 0) {
+      return;
+    }
 
     const label = document.createElement('span');
     label.classList.add('suggestion-label');
     label.textContent = 'Suggestions:';
-    keywordSuggestions.appendChild(label);
+    tagList.appendChild(label);
 
     remaining.forEach((kw) => {
       const chip = document.createElement('button');
       chip.type = 'button';
       chip.classList.add('suggestion-chip');
+      chip.dataset.keyword = kw;
       chip.textContent = kw;
       chip.addEventListener('click', function() {
-        // briefly morph the chip itself to look like a tag before the real
-        // tag list takes over, instead of just popping in elsewhere
-        chip.disabled = true;
-        chip.classList.add('picked');
-        setTimeout(function() {
-          keywordsArray.push(kw);
-          renderTags(true);
-        }, 500);
+        addKeyword(kw);
       });
-      keywordSuggestions.appendChild(chip);
+      tagList.appendChild(chip);
     });
   }
 
   function renderTags(animateNew) {
     tagList.innerHTML = '';
-    tagList.hidden = keywordsArray.length === 0;
     keywordsArray.forEach((tag, index) => {
       const tagEl = document.createElement('span');
       tagEl.classList.add('tag');
@@ -320,23 +358,14 @@
       tagList.appendChild(tagEl);
     });
     hiddenKeywords.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
-    renderKeywordSuggestions();
-  }
-
-  function removeTag(index) {
-    keywordsArray.splice(index, 1);
-    renderTags();
+    renderSuggestionChips();
   }
 
   tagInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
-      const value = tagInput.value.trim();
-      if (value && !keywordsArray.includes(value)) {
-        keywordsArray.push(value);
-        renderTags(true);
-        tagInput.value = '';
-      }
+      addKeyword(tagInput.value.trim());
+      tagInput.value = '';
     } else if (e.key === 'Backspace' && tagInput.value === '' && keywordsArray.length > 0) {
       keywordsArray.pop();
       renderTags();
