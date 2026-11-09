@@ -283,6 +283,11 @@
     const remaining = suggestedKeywords.filter((kw) => !keywordsArray.includes(kw));
     keywordSuggestions.hidden = remaining.length === 0;
 
+    const label = document.createElement('span');
+    label.classList.add('suggestion-label');
+    label.textContent = 'Suggested:';
+    keywordSuggestions.appendChild(label);
+
     remaining.forEach((kw) => {
       const chip = document.createElement('button');
       chip.type = 'button';
