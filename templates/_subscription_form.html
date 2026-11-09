@@ -316,6 +316,11 @@
       keywordsArray.push(value);
       renderTags(true);
     }
+
+    // clicking a suggestion chip moves keyboard focus to that button;
+    // bring it back to the text input so Backspace immediately after
+    // picking a suggestion works the same as it does after typing
+    tagInput.focus();
   }
 
   function renderSuggestionChips() {
