@@ -38,6 +38,7 @@
     <input type="text" id="tag-input" placeholder="Type a keyword and press Enter">
     <!-- Hidden input that holds the comma-joined keyword list for form submission -->
     <input type="hidden" name="keywords" id="hidden-keywords">
+    <div id="keyword-suggestions" class="suggestion-chips"></div>
     <div id="tag-list" class="tag-list-plain"></div>
 </div>
 
@@ -272,7 +273,28 @@
   const tagInput = document.getElementById('tag-input');
   const tagList = document.getElementById('tag-list');
   const hiddenKeywords = document.getElementById('hidden-keywords');
+  const keywordSuggestions = document.getElementById('keyword-suggestions');
+  const suggestedKeywords = ['curly', 'color', 'balayage'];
   let keywordsArray = {{ keywords|default([])|tojson }};
+
+  function renderKeywordSuggestions() {
+    keywordSuggestions.innerHTML = '';
+
+    const remaining = suggestedKeywords.filter((kw) => !keywordsArray.includes(kw));
+    keywordSuggestions.hidden = remaining.length === 0;
+
+    remaining.forEach((kw) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.classList.add('suggestion-chip');
+      chip.textContent = kw;
+      chip.addEventListener('click', function() {
+        keywordsArray.push(kw);
+        renderTags();
+      });
+      keywordSuggestions.appendChild(chip);
+    });
+  }
 
   function renderTags() {
     tagList.innerHTML = '';
@@ -284,6 +306,7 @@
       tagList.appendChild(tagEl);
     });
     hiddenKeywords.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
+    renderKeywordSuggestions();
   }
 
   function removeTag(index) {
