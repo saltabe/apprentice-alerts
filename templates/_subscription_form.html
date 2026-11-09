@@ -285,7 +285,7 @@
 
     const label = document.createElement('span');
     label.classList.add('suggestion-label');
-    label.textContent = 'Suggestions';
+    label.textContent = 'Suggestions:';
     keywordSuggestions.appendChild(label);
 
     remaining.forEach((kw) => {
@@ -300,19 +300,22 @@
         chip.classList.add('picked');
         setTimeout(function() {
           keywordsArray.push(kw);
-          renderTags();
-        }, 200);
+          renderTags(true);
+        }, 500);
       });
       keywordSuggestions.appendChild(chip);
     });
   }
 
-  function renderTags() {
+  function renderTags(animateNew) {
     tagList.innerHTML = '';
     tagList.hidden = keywordsArray.length === 0;
     keywordsArray.forEach((tag, index) => {
       const tagEl = document.createElement('span');
       tagEl.classList.add('tag');
+      if (animateNew && index === keywordsArray.length - 1) {
+        tagEl.classList.add('tag-entering');
+      }
       tagEl.innerHTML = `${tag} <span class="remove" onclick="removeTag(${index})">&times;</span>`;
       tagList.appendChild(tagEl);
     });
@@ -331,7 +334,7 @@
       const value = tagInput.value.trim();
       if (value && !keywordsArray.includes(value)) {
         keywordsArray.push(value);
-        renderTags();
+        renderTags(true);
         tagInput.value = '';
       }
     } else if (e.key === 'Backspace' && tagInput.value === '' && keywordsArray.length > 0) {
