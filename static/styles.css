@@ -310,6 +310,7 @@ select:focus {
   background: #f1ece9;
   color: var(--color-text);
   border: 1px solid transparent;
+  cursor: default;
 }
 
 .suggestion-chip {

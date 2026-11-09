@@ -285,13 +285,15 @@
   function convertSuggestionChip(chip, keyword) {
     chip.classList.remove('suggestion-chip');
     chip.classList.add('tag');
-    chip.disabled = true;
     delete chip.dataset.keyword;
 
     const remove = document.createElement('span');
     remove.classList.add('remove');
     remove.innerHTML = '&times;';
-    remove.addEventListener('click', function() {
+    remove.addEventListener('click', function(e) {
+      // without this, the click bubbles up to the chip's own "add" handler,
+      // which would silently re-add the keyword right after removing it
+      e.stopPropagation();
       removeTag(keywordsArray.indexOf(keyword));
     });
     chip.appendChild(remove);
