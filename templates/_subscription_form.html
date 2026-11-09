@@ -285,7 +285,7 @@
 
     const label = document.createElement('span');
     label.classList.add('suggestion-label');
-    label.textContent = 'Suggested:';
+    label.textContent = 'Suggestions';
     keywordSuggestions.appendChild(label);
 
     remaining.forEach((kw) => {
@@ -294,8 +294,14 @@
       chip.classList.add('suggestion-chip');
       chip.textContent = kw;
       chip.addEventListener('click', function() {
-        keywordsArray.push(kw);
-        renderTags();
+        // briefly morph the chip itself to look like a tag before the real
+        // tag list takes over, instead of just popping in elsewhere
+        chip.disabled = true;
+        chip.classList.add('picked');
+        setTimeout(function() {
+          keywordsArray.push(kw);
+          renderTags();
+        }, 200);
       });
       keywordSuggestions.appendChild(chip);
     });

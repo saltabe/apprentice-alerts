@@ -298,10 +298,17 @@ select:focus {
   font-size: 0.85rem;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 }
 
-.suggestion-chip:hover {
+.suggestion-chip.picked {
+  background: #f1ece9;
+  border-color: #f1ece9;
+  color: var(--color-text);
+  cursor: default;
+}
+
+.suggestion-chip:hover:not(.picked) {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
