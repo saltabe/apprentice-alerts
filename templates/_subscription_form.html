@@ -275,28 +275,43 @@
   const suggestedKeywords = ['curly', 'color', 'balayage'];
   let keywordsArray = {{ keywords|default([])|tojson }};
 
+  let lastAdded = null;
+
   function removeTag(index) {
     keywordsArray.splice(index, 1);
     renderTags();
   }
 
-  // converts a suggestion chip into a real tag in place, same DOM element,
-  // same position, same size - nothing is destroyed or moved
-  function convertSuggestionChip(chip, keyword) {
-    chip.classList.remove('suggestion-chip');
-    chip.classList.add('tag');
-    delete chip.dataset.keyword;
+  function buildTagEl(keyword) {
+    const tagEl = document.createElement('span');
+    tagEl.classList.add('tag');
+    if (keyword === lastAdded) {
+      tagEl.classList.add('tag-entering');
+    }
+    const label = document.createElement('span');
+    label.textContent = keyword;
+    tagEl.appendChild(label);
 
     const remove = document.createElement('span');
     remove.classList.add('remove');
     remove.innerHTML = '&times;';
-    remove.addEventListener('click', function(e) {
-      // without this, the click bubbles up to the chip's own "add" handler,
-      // which would silently re-add the keyword right after removing it
-      e.stopPropagation();
+    remove.addEventListener('click', function() {
       removeTag(keywordsArray.indexOf(keyword));
     });
-    chip.appendChild(remove);
+    tagEl.appendChild(remove);
+
+    return tagEl;
+  }
+
+  function buildSuggestionChipEl(keyword) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.classList.add('suggestion-chip');
+    chip.textContent = keyword;
+    chip.addEventListener('click', function() {
+      addKeyword(keyword);
+    });
+    return chip;
   }
 
   function addKeyword(value) {
@@ -304,18 +319,9 @@
       return;
     }
 
-    // works the same whether the keyword came from clicking a chip or
-    // typing text that happens to match one currently on screen
-    const existingChip = tagList.querySelector(`[data-keyword="${value}"]`);
-
-    if (existingChip) {
-      convertSuggestionChip(existingChip, value);
-      keywordsArray.push(value);
-      hiddenKeywords.value = keywordsArray.join(',');
-    } else {
-      keywordsArray.push(value);
-      renderTags(true);
-    }
+    keywordsArray.push(value);
+    lastAdded = value;
+    renderTags();
 
     // clicking a suggestion chip moves keyboard focus to that button;
     // bring it back to the text input so Backspace immediately after
@@ -323,49 +329,32 @@
     tagInput.focus();
   }
 
-  function renderSuggestionChips() {
-    const remaining = suggestedKeywords.filter((kw) => !keywordsArray.includes(kw));
-
-    const existingLabel = tagList.querySelector('.suggestion-label');
-    if (existingLabel) {
-      existingLabel.remove();
-    }
-
-    if (remaining.length === 0) {
-      return;
-    }
-
-    const label = document.createElement('span');
-    label.classList.add('suggestion-label');
-    label.textContent = 'Suggestions:';
-    tagList.appendChild(label);
-
-    remaining.forEach((kw) => {
-      const chip = document.createElement('button');
-      chip.type = 'button';
-      chip.classList.add('suggestion-chip');
-      chip.dataset.keyword = kw;
-      chip.textContent = kw;
-      chip.addEventListener('click', function() {
-        addKeyword(kw);
-      });
-      tagList.appendChild(chip);
-    });
-  }
-
-  function renderTags(animateNew) {
+  function renderTags() {
     tagList.innerHTML = '';
-    keywordsArray.forEach((tag, index) => {
-      const tagEl = document.createElement('span');
-      tagEl.classList.add('tag');
-      if (animateNew && index === keywordsArray.length - 1) {
-        tagEl.classList.add('tag-entering');
-      }
-      tagEl.innerHTML = `${tag} <span class="remove" onclick="removeTag(${index})">&times;</span>`;
-      tagList.appendChild(tagEl);
+
+    // suggestions always render first, in this fixed order, each shown as
+    // either an available chip or (once added) a committed tag - this row
+    // never reorders and never shifts position as other keywords are added
+    const anySuggestionsLeft = suggestedKeywords.some((kw) => !keywordsArray.includes(kw));
+
+    if (anySuggestionsLeft) {
+      const label = document.createElement('span');
+      label.classList.add('suggestion-label');
+      label.textContent = 'Suggestions:';
+      tagList.appendChild(label);
+    }
+
+    suggestedKeywords.forEach((kw) => {
+      tagList.appendChild(keywordsArray.includes(kw) ? buildTagEl(kw) : buildSuggestionChipEl(kw));
     });
+
+    // freely-typed keywords accumulate here, below the suggestions, in the
+    // order they were added - they never get inserted above suggestions
+    keywordsArray
+      .filter((kw) => !suggestedKeywords.includes(kw))
+      .forEach((kw) => tagList.appendChild(buildTagEl(kw)));
+
     hiddenKeywords.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
-    renderSuggestionChips();
   }
 
   tagInput.addEventListener('keydown', function(e) {
@@ -375,6 +364,7 @@
       tagInput.value = '';
     } else if (e.key === 'Backspace' && tagInput.value === '' && keywordsArray.length > 0) {
       keywordsArray.pop();
+      lastAdded = null;
       renderTags();
     }
   });
