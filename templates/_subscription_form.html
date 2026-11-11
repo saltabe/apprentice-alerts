@@ -34,11 +34,19 @@
 </div>
 
 <div class="field">
-    <label for="tag-input">Keywords</label>
-    <input type="text" id="tag-input" placeholder="Type a keyword and press Enter">
+    <label for="include-input">Include</label>
+    <input type="text" id="include-input" placeholder="Type a keyword and press Enter">
     <!-- Hidden input that holds the comma-joined keyword list for form submission -->
-    <input type="hidden" name="keywords" id="hidden-keywords">
-    <div id="tag-list" class="tag-list-plain"></div>
+    <input type="hidden" name="include_keywords" id="hidden-include-keywords">
+    <div id="include-tag-list" class="tag-list-plain"></div>
+</div>
+
+<div class="field">
+    <label for="exclude-input">Exclude</label>
+    <input type="text" id="exclude-input" placeholder="Type a keyword and press Enter">
+    <!-- Hidden input that holds the comma-joined keyword list for form submission -->
+    <input type="hidden" name="exclude_keywords" id="hidden-exclude-keywords">
+    <div id="exclude-tag-list" class="tag-list-plain"></div>
 </div>
 
 <script>
@@ -269,105 +277,125 @@
     }
   });
 
-  const tagInput = document.getElementById('tag-input');
-  const tagList = document.getElementById('tag-list');
-  const hiddenKeywords = document.getElementById('hidden-keywords');
-  const suggestedKeywords = ['curly', 'color', 'balayage'];
-  let keywordsArray = {{ keywords|default([])|tojson }};
+  // one instance of this runs the whole tag-input + suggestion-chip widget
+  // for a single field (Include or Exclude), independently of the other
+  function createKeywordField(options) {
+    const input = document.getElementById(options.inputId);
+    const tagList = document.getElementById(options.tagListId);
+    const hiddenInput = document.getElementById(options.hiddenInputId);
+    const suggestedKeywords = options.suggestedKeywords;
+    let keywordsArray = options.initialKeywords.slice();
 
-  let lastAdded = null;
+    let lastAdded = null;
 
-  function removeTag(index) {
-    keywordsArray.splice(index, 1);
-    renderTags();
-  }
-
-  function buildTagEl(keyword) {
-    const tagEl = document.createElement('span');
-    tagEl.classList.add('tag');
-    if (keyword === lastAdded) {
-      tagEl.classList.add('tag-entering');
-    }
-    const label = document.createElement('span');
-    label.textContent = keyword;
-    tagEl.appendChild(label);
-
-    const remove = document.createElement('span');
-    remove.classList.add('remove');
-    remove.innerHTML = '&times;';
-    remove.addEventListener('click', function() {
-      removeTag(keywordsArray.indexOf(keyword));
-    });
-    tagEl.appendChild(remove);
-
-    return tagEl;
-  }
-
-  function buildSuggestionChipEl(keyword) {
-    const chip = document.createElement('button');
-    chip.type = 'button';
-    chip.classList.add('suggestion-chip');
-    chip.textContent = keyword;
-    chip.addEventListener('click', function() {
-      addKeyword(keyword);
-    });
-    return chip;
-  }
-
-  function addKeyword(value) {
-    if (!value || keywordsArray.includes(value)) {
-      return;
-    }
-
-    keywordsArray.push(value);
-    lastAdded = value;
-    renderTags();
-
-    // clicking a suggestion chip moves keyboard focus to that button;
-    // bring it back to the text input so Backspace immediately after
-    // picking a suggestion works the same as it does after typing
-    tagInput.focus();
-  }
-
-  function renderTags() {
-    tagList.innerHTML = '';
-
-    // suggestions always render first, in this fixed order, each shown as
-    // either an available chip or (once added) a committed tag - this row
-    // never reorders and never shifts position as other keywords are added
-    const anySuggestionsLeft = suggestedKeywords.some((kw) => !keywordsArray.includes(kw));
-
-    if (anySuggestionsLeft) {
-      const label = document.createElement('span');
-      label.classList.add('suggestion-label');
-      label.textContent = 'Suggestions:';
-      tagList.appendChild(label);
-    }
-
-    suggestedKeywords.forEach((kw) => {
-      tagList.appendChild(keywordsArray.includes(kw) ? buildTagEl(kw) : buildSuggestionChipEl(kw));
-    });
-
-    // freely-typed keywords accumulate here, below the suggestions, in the
-    // order they were added - they never get inserted above suggestions
-    keywordsArray
-      .filter((kw) => !suggestedKeywords.includes(kw))
-      .forEach((kw) => tagList.appendChild(buildTagEl(kw)));
-
-    hiddenKeywords.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
-  }
-
-  tagInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addKeyword(tagInput.value.trim());
-      tagInput.value = '';
-    } else if (e.key === 'Backspace' && tagInput.value === '' && keywordsArray.length > 0) {
-      keywordsArray.pop();
-      lastAdded = null;
+    function removeTag(index) {
+      keywordsArray.splice(index, 1);
       renderTags();
     }
+
+    function buildTagEl(keyword) {
+      const tagEl = document.createElement('span');
+      tagEl.classList.add('tag');
+      if (keyword === lastAdded) {
+        tagEl.classList.add('tag-entering');
+      }
+      const label = document.createElement('span');
+      label.textContent = keyword;
+      tagEl.appendChild(label);
+
+      const remove = document.createElement('span');
+      remove.classList.add('remove');
+      remove.innerHTML = '&times;';
+      remove.addEventListener('click', function() {
+        removeTag(keywordsArray.indexOf(keyword));
+      });
+      tagEl.appendChild(remove);
+
+      return tagEl;
+    }
+
+    function buildSuggestionChipEl(keyword) {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.classList.add('suggestion-chip');
+      chip.textContent = keyword;
+      chip.addEventListener('click', function() {
+        addKeyword(keyword);
+      });
+      return chip;
+    }
+
+    function addKeyword(value) {
+      if (!value || keywordsArray.includes(value)) {
+        return;
+      }
+
+      keywordsArray.push(value);
+      lastAdded = value;
+      renderTags();
+
+      // clicking a suggestion chip moves keyboard focus to that button;
+      // bring it back to the text input so Backspace immediately after
+      // picking a suggestion works the same as it does after typing
+      input.focus();
+    }
+
+    function renderTags() {
+      tagList.innerHTML = '';
+
+      // suggestions always render first, in this fixed order, each shown as
+      // either an available chip or (once added) a committed tag - this row
+      // never reorders and never shifts position as other keywords are added
+      const anySuggestionsLeft = suggestedKeywords.some((kw) => !keywordsArray.includes(kw));
+
+      if (anySuggestionsLeft) {
+        const label = document.createElement('span');
+        label.classList.add('suggestion-label');
+        label.textContent = 'Suggestions:';
+        tagList.appendChild(label);
+      }
+
+      suggestedKeywords.forEach((kw) => {
+        tagList.appendChild(keywordsArray.includes(kw) ? buildTagEl(kw) : buildSuggestionChipEl(kw));
+      });
+
+      // freely-typed keywords accumulate here, below the suggestions, in the
+      // order they were added - they never get inserted above suggestions
+      keywordsArray
+        .filter((kw) => !suggestedKeywords.includes(kw))
+        .forEach((kw) => tagList.appendChild(buildTagEl(kw)));
+
+      hiddenInput.value = keywordsArray.join(','); // Submits as "kw1,kw2,kw3"
+    }
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        addKeyword(input.value.trim());
+        input.value = '';
+      } else if (e.key === 'Backspace' && input.value === '' && keywordsArray.length > 0) {
+        keywordsArray.pop();
+        lastAdded = null;
+        renderTags();
+      }
+    });
+
+    renderTags();
+  }
+
+  createKeywordField({
+    inputId: 'include-input',
+    tagListId: 'include-tag-list',
+    hiddenInputId: 'hidden-include-keywords',
+    suggestedKeywords: ['curly', 'color', 'balayage'],
+    initialKeywords: {{ include_keywords|default([])|tojson }},
   });
 
-  renderTags();
+  createKeywordField({
+    inputId: 'exclude-input',
+    tagListId: 'exclude-tag-list',
+    hiddenInputId: 'hidden-exclude-keywords',
+    suggestedKeywords: ['highlights', 'wax', 'pixie'],
+    initialKeywords: {{ exclude_keywords|default([])|tojson }},
+  });
 </script>

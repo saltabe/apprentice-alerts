@@ -24,13 +24,17 @@ models.init_db(models.get_connection())
 def _get_forms():
     email = request.form.get("email")
     city = request.form.get("city")
-    keywords_str = request.form.get("keywords")
+    include_str = request.form.get("include_keywords")
+    exclude_str = request.form.get("exclude_keywords")
 
-    return email, city, keywords_str
+    return email, city, include_str, exclude_str
 
 
 def _format_keywords(keywords_str):
-    return [item.strip() for item in keywords_str.split(',')]
+    if not keywords_str:
+        return []
+
+    return [item.strip() for item in keywords_str.split(',') if item.strip()]
 
 
 def _decode_token(token):
@@ -40,16 +44,25 @@ def _decode_token(token):
         return None
 
 
-def _signup_form_valid(email, city, keywords_str):
-    return bool(email) and city in CITIES and bool(keywords_str)
+def _signup_form_valid(email, city, include_str, exclude_str):
+    return bool(email) and city in CITIES and (bool(include_str) or bool(exclude_str))
 
 
-def _render_manage_page(email, city, keywords, token):
+def _insert_keywords(conn, email, city, include_str, exclude_str):
+    for keyword in _format_keywords(include_str):
+        models.insert_user(conn, email, city, keyword, "include")
+
+    for keyword in _format_keywords(exclude_str):
+        models.insert_user(conn, email, city, keyword, "exclude")
+
+
+def _render_manage_page(email, city, include_keywords, exclude_keywords, token):
     return render_template(
         "change.html",
         email=email,
         city=city,
-        keywords=keywords,
+        include_keywords=include_keywords,
+        exclude_keywords=exclude_keywords,
         token=token,
         city_labels=CITY_LABELS,
     )
@@ -60,15 +73,12 @@ def index():
     if request.method == "POST":
         conn = models.get_connection()
 
-        email, city, keywords_str = _get_forms()
+        email, city, include_str, exclude_str = _get_forms()
 
-        if not _signup_form_valid(email, city, keywords_str):
+        if not _signup_form_valid(email, city, include_str, exclude_str):
             return redirect("/")
 
-        keywords = _format_keywords(keywords_str)
-
-        for keyword in keywords:
-            models.insert_user(conn, email, city, keyword)
+        _insert_keywords(conn, email, city, include_str, exclude_str)
 
         conn.commit()
 
@@ -101,25 +111,24 @@ def update():
 
         # below code is for if user modifies subscription
 
-        email, city, keywords_str = _get_forms()
+        email, city, include_str, exclude_str = _get_forms()
 
-        if not _signup_form_valid(email, city, keywords_str):
+        if not _signup_form_valid(email, city, include_str, exclude_str):
             return redirect("/")
 
         # delete all existing entries for user
         # to keep it simple
         models.delete_user(conn, old_email)
 
-        keywords = _format_keywords(keywords_str)
-
-        for keyword in keywords:
-            models.insert_user(conn, email, city, keyword)
+        _insert_keywords(conn, email, city, include_str, exclude_str)
 
         conn.commit()
 
         flash("Your subscription has been updated.")
 
-        return _render_manage_page(email, city, keywords, token)
+        return _render_manage_page(
+            email, city, _format_keywords(include_str), _format_keywords(exclude_str), token
+        )
 
     else:
         conn = models.get_connection()
@@ -133,9 +142,10 @@ def update():
         rows = models.select_user(conn, old_email)
         email = rows[0]["email"]
         city = rows[0]["city"]
-        keywords = [row["keyword"] for row in rows]
+        include_keywords = [row["keyword"] for row in rows if row["keyword_type"] == "include"]
+        exclude_keywords = [row["keyword"] for row in rows if row["keyword_type"] == "exclude"]
 
-        return _render_manage_page(email, city, keywords, token)
+        return _render_manage_page(email, city, include_keywords, exclude_keywords, token)
 
 
 @app.route("/run-daily-alert", methods=["POST"])

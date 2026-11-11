@@ -26,13 +26,23 @@ def _create_users_table(conn):
             email TEXT
             , city TEXT
             , keyword TEXT
+            , keyword_type TEXT
             )
     """)
 
+    # migrate rows from before keyword_type existed - they were all
+    # "include" keywords under the old single-field model
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(users)").fetchall()]
+    if "keyword_type" not in columns:
+        conn.execute("ALTER TABLE users ADD COLUMN keyword_type TEXT")
+        conn.execute("UPDATE users SET keyword_type = 'include' WHERE keyword_type IS NULL")
+        conn.commit()
 
-def insert_user(conn, email, city, keyword):
+
+def insert_user(conn, email, city, keyword, keyword_type):
     conn.execute(
-        "INSERT INTO users (email, city, keyword) VALUES (?, ?, ?)", (email, city, keyword)
+        "INSERT INTO users (email, city, keyword, keyword_type) VALUES (?, ?, ?, ?)",
+        (email, city, keyword, keyword_type)
     )
 
 

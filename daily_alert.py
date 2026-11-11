@@ -30,17 +30,28 @@ def _save_ads(conn, ads):
 def _get_relevant_users(conn, ads):
     users = models.select_all_users(conn)
 
+    # group each subscriber's keywords by type; a user with no include
+    # keywords matches every ad (subject to exclude), per the "exclude only"
+    # signup case
+    user_keywords = {}
+    for row in users:
+        keywords = user_keywords.setdefault(row["email"], {"include": [], "exclude": []})
+        keywords[row["keyword_type"]].append(row["keyword"].lower())
+
     matches = {}
 
     for ad in ads:
         searchable = f"{ad['title']} {ad['service_type']}".lower()
 
-        for row in users:
-            if row["keyword"].lower() in searchable:
-                email = row["email"]
+        for email, keywords in user_keywords.items():
+            includes = keywords["include"]
+            excludes = keywords["exclude"]
 
-                if email not in matches:
-                    matches[email] = []
+            included = not includes or any(kw in searchable for kw in includes)
+            excluded = any(kw in searchable for kw in excludes)
+
+            if included and not excluded:
+                matches.setdefault(email, [])
 
                 if ad not in matches[email]:
                     matches[email].append(ad)
