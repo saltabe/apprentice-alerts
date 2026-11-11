@@ -66,6 +66,7 @@ def _create_ads_table(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS ads (
             edit_id INTEGER PRIMARY KEY
+            , city TEXT
             , title TEXT
             , service_type TEXT
             , fee TEXT
@@ -75,11 +76,19 @@ def _create_ads_table(conn):
             )
     """)
 
+    # migrate rows from before city was tracked - unknown for these older
+    # rows, but harmless since the daily job only ever dedupes by edit_id
+    columns = [row[1] for row in conn.execute("PRAGMA table_info(ads)").fetchall()]
+    if "city" not in columns:
+        conn.execute("ALTER TABLE ads ADD COLUMN city TEXT")
+        conn.commit()
 
-def insert_ad(conn, edit_id, title, service_type, fee, salon, neighborhood, next_service_date):
+
+def insert_ad(conn, edit_id, city, title, service_type, fee, salon, neighborhood, next_service_date):
     conn.execute("""
         INSERT INTO ads (
             edit_id
+            , city
             , title
             , service_type
             , fee
@@ -87,8 +96,8 @@ def insert_ad(conn, edit_id, title, service_type, fee, salon, neighborhood, next
             , neighborhood
             , next_service_date
             )
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (edit_id, title, service_type, fee, salon, neighborhood, next_service_date))
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (edit_id, city, title, service_type, fee, salon, neighborhood, next_service_date))
 
 
 def select_ad(conn, edit_id):

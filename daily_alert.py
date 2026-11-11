@@ -30,22 +30,25 @@ def _save_ads(conn, ads):
 def _get_relevant_users(conn, ads):
     users = models.select_all_users(conn)
 
-    # group each subscriber's keywords by type; a user with no include
-    # keywords matches every ad (subject to exclude), per the "exclude only"
-    # signup case
+    # group each subscriber's city and keywords (by type); a user with no
+    # include keywords matches every ad in their city (subject to exclude),
+    # per the "exclude only" signup case
     user_keywords = {}
     for row in users:
-        keywords = user_keywords.setdefault(row["email"], {"include": [], "exclude": []})
-        keywords[row["keyword_type"]].append(row["keyword"].lower())
+        data = user_keywords.setdefault(row["email"], {"city": row["city"], "include": [], "exclude": []})
+        data[row["keyword_type"]].append(row["keyword"].lower())
 
     matches = {}
 
     for ad in ads:
         searchable = f"{ad['title']} {ad['service_type']}".lower()
 
-        for email, keywords in user_keywords.items():
-            includes = keywords["include"]
-            excludes = keywords["exclude"]
+        for email, data in user_keywords.items():
+            if data["city"] != ad["city"]:
+                continue
+
+            includes = data["include"]
+            excludes = data["exclude"]
 
             included = not includes or any(kw in searchable for kw in includes)
             excluded = any(kw in searchable for kw in excludes)

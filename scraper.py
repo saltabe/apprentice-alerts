@@ -87,7 +87,7 @@ def _get_soup(url, header_info=""):
     return soup
 
 
-def _get_ads(url):
+def _get_ads(url, city):
     soup = _get_soup(url)
 
     rows = soup.find_all("tr", class_="r-gridrow")
@@ -111,6 +111,7 @@ def _get_ads(url):
 
         ad = {
             "edit_id": edit_id,
+            "city": city,
             "title": title,
             "service_type": service_type,
             "fee": fee,
@@ -128,8 +129,8 @@ def loop_cities():
     all_ads = []
 
     for city in CITIES:
-        city = urllib.parse.quote(city)
-        url = _BASE + city + ")"
-        all_ads.extend(_get_ads(url))
+        encoded_city = urllib.parse.quote(city)
+        url = _BASE + encoded_city + ")"
+        all_ads.extend(_get_ads(url, city))
 
     return all_ads
